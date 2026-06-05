@@ -1,5 +1,6 @@
 package io.github.some_example_name;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NavigationHandler {
@@ -11,10 +12,15 @@ public class NavigationHandler {
     List<Button> gameButtons;
 
     public NavigationHandler(){
+        homeButtons = new ArrayList<>();
+        settingsButtons = new ArrayList<>();
+        gameButtons = new ArrayList<>();
+        createButtons();
     }
 
     public void createButtons(){
-        homeButtons.add(new Button("play", 100, 100, 20));
+        homeButtons.add(new Button("gameScreen", 500, 300, 40));
+        gameButtons.add(new Button("homeScreen", 600, 400, 50));
     }
 
     public void setScreen(String newScreen){
@@ -36,8 +42,8 @@ public class NavigationHandler {
         switch(title){
             case "homeScreen":
                 return homeButtons;
-            //case "gameScreen":
-            //    return gameButtons;
+            case "gameScreen":
+               return gameButtons;
         }
         return null;
     }
