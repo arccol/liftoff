@@ -1,16 +1,20 @@
 package io.github.some_example_name;
 
+import java.util.List;
+
 public class NavigationHandler {
     String currentScreen;
     String previousScreen;
     String tempScreen;
-    Button[] buttons;
+    List<Button> homeButtons;
+    List<Button> settingsButtons;
+    List<Button> gameButtons;
 
     public NavigationHandler(){
     }
 
     public void createButtons(){
-
+        homeButtons.add(new Button("play", 100, 100, 20));
     }
 
     public void setScreen(String newScreen){
@@ -28,7 +32,13 @@ public class NavigationHandler {
         previousScreen = tempScreen;
     }
 
-    public Button[] getButtons(String title){
-        return buttons;
+    public List<Button> getButtons(String title){
+        switch(title){
+            case "homeScreen":
+                return homeButtons;
+            //case "gameScreen":
+            //    return gameButtons;
+        }
+        return null;
     }
 }

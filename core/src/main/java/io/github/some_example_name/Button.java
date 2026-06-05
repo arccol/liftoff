@@ -5,14 +5,12 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Button {
     String title;
-    String screen;
     int x;
     int y;
     int rad;
 
-    public Button(String title, String screen, int x, int y, int rad){
+    public Button(String title, int x, int y, int rad){
         this.title = title;
-        this.screen = screen;
         this.x = x;
         this.y = y;
         this.rad = rad;
@@ -26,10 +24,6 @@ public class Button {
 
     public void draw(ShapeRenderer sr){
         sr.circle(x,y,rad);
-    }
-
-    public String getScreen(){
-        return screen;
     }
 
     public String getTitle(){
