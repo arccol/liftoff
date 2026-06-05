@@ -35,15 +35,13 @@ public class Main extends ApplicationAdapter {
         mousePos.x = Gdx.input.getX();
         mousePos.y = 960-Gdx.input.getY();
         switch(screenHandler.getCurrentScreen()){
-            case "gameScreen":
-                buttons = screenHandler.getButtons("gameScreen");
+            case "levelScreen":
+                buttons = screenHandler.getButtons("levelScreen");
                 sr.begin(ShapeRenderer.ShapeType.Filled);
-                //player.draw(sr);
                 for(Button button : buttons){
                     button.draw(sr);
                     if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
                         if (button.getClicked(mousePos)) {
-                            System.out.println(button.getTitle());
                             screenHandler.setScreen(button.getTitle());
                         }
                     }
@@ -57,13 +55,52 @@ public class Main extends ApplicationAdapter {
                     button.draw(sr);
                     if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
                         if (button.getClicked(mousePos)) {
-                            System.out.println(button.getTitle());
                             screenHandler.setScreen(button.getTitle());
                         }
                     }
                 }
                 sr.end();
                 break;
+            case "settingsScreen":
+                buttons = screenHandler.getButtons("settingsScreen");
+                sr.begin(ShapeRenderer.ShapeType.Filled);
+                for(Button button : buttons){
+                    button.draw(sr);
+                    if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                        if (button.getClicked(mousePos)) {
+                            screenHandler.setScreen(button.getTitle());
+                        }
+                    }
+                }
+                sr.end();
+                break;
+            case "customiseScreen":
+                buttons = screenHandler.getButtons("customiseScreen");
+                sr.begin(ShapeRenderer.ShapeType.Filled);
+                for(Button button : buttons){
+                    button.draw(sr);
+                    if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                        if (button.getClicked(mousePos)) {
+                            screenHandler.setScreen(button.getTitle());
+                        }
+                    }
+                }
+                sr.end();
+                break;
+            case "inGameScreen":
+                buttons = screenHandler.getButtons("inGameScreen");
+                sr.begin(ShapeRenderer.ShapeType.Filled);
+                for(Button button : buttons){
+                    button.draw(sr);
+                    if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                        if (button.getClicked(mousePos)) {
+                            screenHandler.setScreen(button.getTitle());
+                        }
+                    }
+                }
+                sr.end();
+                break;
+
         }
     }
 
