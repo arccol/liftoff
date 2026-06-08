@@ -5,10 +5,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.utils.ScreenUtils;
+import jdk.javadoc.internal.doclets.formats.html.Table;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class Main extends ApplicationAdapter {
     List<RealPlanet> planets;
@@ -17,6 +18,10 @@ public class Main extends ApplicationAdapter {
     NavigationHandler screenHandler;
     ShapeRenderer sr;
     Vector2 mousePos;
+    private Stage stage;
+    private Table table;
+
+    // https://libgdx.com/wiki/graphics/2d/scene2d/scene2d-ui#stage-setup
 
     @Override
     public void create() {
@@ -100,7 +105,6 @@ public class Main extends ApplicationAdapter {
                 }
                 sr.end();
                 break;
-
         }
     }
 

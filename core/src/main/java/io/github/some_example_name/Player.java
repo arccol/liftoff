@@ -2,9 +2,7 @@ package io.github.some_example_name;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-
 import java.util.List;
-import java.util.Vector;
 
 public class Player {
     Vector2 vel;
