@@ -25,12 +25,6 @@ public class NavigationHandler {
     }
 
     public void createButtons(){
-        homeButtons.add(new Button("levelScreen", Gdx.graphics.getWidth()/2-50, 300, 100));
-        homeButtons.add(new Button("settingsScreen", Gdx.graphics.getWidth()/2-450, 300, 50));
-        homeButtons.add(new Button("customiseScreen", Gdx.graphics.getWidth()/2+350, 300, 50));
-        levelButtons.add(new Button("homeScreen", 50, 910, 25));
-        customiseButtons.add(new Button("homeScreen", 50, 910, 25));
-        settingsButtons.add(new Button("homeScreen", 50, 910, 25));
 
     }
 

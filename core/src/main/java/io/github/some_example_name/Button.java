@@ -1,32 +1,23 @@
 package io.github.some_example_name;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 
-public class Button {
-    String title;
-    int x;
-    int y;
-    int rad;
+public class Button extends Actor {
+    TextureRegion region;
 
-    public Button(String title, int x, int y, int rad){
-        this.title = title;
-        this.x = x;
-        this.y = y;
-        this.rad = rad;
+    public Button(){
+        region = new TextureRegion(texture,100,100);
+        setBounds(region.getRegionX(),region.getRegionY(),region.getRegionWidth(),region.getRegionHeight());
     }
 
-    public boolean getClicked(Vector2 mousePos){
-        float dx = mousePos.x - x;
-        float dy = mousePos.y - y;
-        return (dx * dx + dy * dy) <= (rad * rad);
-    }
-
-    public void draw(ShapeRenderer sr){
-        sr.circle(x,y,rad);
-    }
-
-    public String getTitle(){
-        return title;
+    public void draw(Batch batch, float parentAlpha){
+        Color color = getColor();
+        batch.setColor(color.r,color.g,color.b,color.a*parentAlpha);
+        batch.draw(region,getX(),getY(),getOriginX(),getOriginY(),getWidth(),getHeight(),getScaleX(),getScaleY(),getRotation());
     }
 }
