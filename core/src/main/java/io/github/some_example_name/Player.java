@@ -69,8 +69,6 @@ public class Player {
             delta.nor();
 
             position.add(delta.cpy().scl(overlap*rad/50));
-            target.position.sub(delta.cpy().scl(overlap*rad/50));
-
 
             float vector1 = vel.dot(delta);
 

@@ -17,7 +17,6 @@ public class Main extends ApplicationAdapter {
     List<RealPlanet> planets;
     List<Button> buttons;
     Player player;
-    NavigationHandler screenHandler;
     ShapeRenderer sr;
     Vector2 mousePos;
     private Stage stage;
@@ -31,8 +30,6 @@ public class Main extends ApplicationAdapter {
         buttons = new ArrayList<>();
         planets = new ArrayList<>();
         player = new Player(0,0,10);
-        screenHandler = new NavigationHandler();
-        screenHandler.setScreen("homeScreen");
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
     }
