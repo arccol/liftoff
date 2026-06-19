@@ -32,7 +32,7 @@ public class Trajectory {
                 if (planet == null) {
                     continue;
                 }
-                Vector2 planetForce = planet.getPos().cpy()
+                Vector2 planetForce = planet.getPosition().cpy()
                     .sub(pos)
                     .setLength(planet.getDens() * planet.getSize() / 200f);
 
