@@ -2,6 +2,7 @@ package io.github.some_example_name;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -32,9 +33,6 @@ public class Main extends ApplicationAdapter {
     }
     private Screen currentScreen;
 
-
-    // https://libgdx.com/wiki/graphics/2d/scene2d/scene2d-ui#stage-setup
-
     @Override
     public void create() {
         sr = new ShapeRenderer();
@@ -45,6 +43,7 @@ public class Main extends ApplicationAdapter {
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         Gdx.input.setInputProcessor(stage);
         changeScreen(Screen.HOME);
+        Gdx.graphics.setResizable(false);
     }
 
     public void changeScreen(Screen screen){
@@ -71,7 +70,6 @@ public class Main extends ApplicationAdapter {
         play.setPosition(565,350);
         play.setSize(150,80);
         play.addListener(new ClickListener() {
-
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 changeScreen(Screen.GAME);
@@ -82,7 +80,6 @@ public class Main extends ApplicationAdapter {
         settings.setPosition(290, 350);
         settings.setSize(150,80);
         settings.addListener(new ClickListener() {
-
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 changeScreen(Screen.SETTINGS);
@@ -93,7 +90,6 @@ public class Main extends ApplicationAdapter {
         customise.setPosition(840, 350);
         customise.setSize(150,80);
         customise.addListener(new ClickListener() {
-
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 changeScreen(Screen.CUSTOMISE);
@@ -106,7 +102,6 @@ public class Main extends ApplicationAdapter {
     }
 
     private void createSettingsScreen(){
-
         TextButton back = new TextButton("Back", skin);
         back.setPosition(0, 900);
         back.setSize(100, 60);
@@ -116,12 +111,10 @@ public class Main extends ApplicationAdapter {
                 changeScreen(Screen.HOME);
             }
         });
-
         stage.addActor(back);
     }
 
     private void createCustomiseScreen(){
-
         TextButton back = new TextButton("Back", skin);
         back.setPosition(0, 900);
         back.setSize(100, 60);
@@ -136,9 +129,6 @@ public class Main extends ApplicationAdapter {
     }
 
     private void createGameScreen() {
-
-        // game
-
         TextButton back = new TextButton("Back", skin);
         back.setPosition(0, 900);
         back.setSize(100, 60);
@@ -159,6 +149,12 @@ public class Main extends ApplicationAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act(delta);
         stage.draw();
+        sr.begin(ShapeRenderer.ShapeType.Filled);
+        switch(currentScreen){
+            case GAME:
+                // game loop
+        }
+        sr.end();
     }
 
     @Override
