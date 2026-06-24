@@ -14,6 +14,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import jdk.javadoc.internal.doclets.formats.html.Table;
+
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,13 +34,16 @@ public class Main extends ApplicationAdapter {
         CUSTOMISE
     }
     private Screen currentScreen;
+    private boolean mDown;
 
     @Override
     public void create() {
         sr = new ShapeRenderer();
         buttons = new ArrayList<>();
         planets = new ArrayList<>();
-        player = new Player(0,0,10);
+        player = new Player(400,400,10);
+        player.setLaunched(false);
+        mousePos = new Vector2();
         stage = new Stage(new ScreenViewport());
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         Gdx.input.setInputProcessor(stage);
@@ -149,10 +154,52 @@ public class Main extends ApplicationAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act(delta);
         stage.draw();
+
+        mDown = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+
+        mousePos.set(
+            Gdx.input.getX(),
+            Gdx.graphics.getHeight() - Gdx.input.getY()
+        );
+
         sr.begin(ShapeRenderer.ShapeType.Filled);
+
         switch(currentScreen){
             case GAME:
                 // game loop
+                if(Gdx.input.isKeyJustPressed(Input.Keys.S)){
+                    planets.add(new RealPlanet((int) mousePos.x, (int) mousePos.y, 20, 2));
+                }
+                for(RealPlanet planet : planets) {
+                    if (planet == null) {
+                        continue;
+                    }
+                    planet.draw(sr);
+                    if (player.getLaunched()) {
+                        if (player.checkColPlanet(planet)) {
+                            player.moveCol(planet);
+                        }
+                        Vector2 planetForce = planet.getPosition().cpy()
+                            .sub(player.getPosition())
+                            .setLength(planet.getDens() * planet.getSize() / 200f);
+                        player.applyForce(planetForce);
+                        player.updatePos();
+                    }
+                }
+
+                Vector2 mouseForce = mousePos.cpy()
+                    .sub(player.getPosition())
+                    .scl(0.03f)
+                    .scl(-1);
+
+                mouseForce.scl(mouseForce.len());
+                mouseForce.limit(20f);
+
+                if(!player.getLaunched()){
+                    player.genTrail(planets,sr,mousePos);
+                }
+
+                player.draw(sr);
         }
         sr.end();
     }

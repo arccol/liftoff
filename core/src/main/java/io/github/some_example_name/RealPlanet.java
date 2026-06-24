@@ -8,6 +8,7 @@ public class RealPlanet {
     int rad;
     int dens;
     Vector2 tempvec;
+    boolean placed;
 
     public RealPlanet(int x, int y, int rad, int dens){
         position = new Vector2(x,y);
@@ -30,5 +31,9 @@ public class RealPlanet {
 
     public int getSize() {
         return rad;
+    }
+
+    public void attachToMouse(Vector2 mousePos){
+        position = mousePos;
     }
 }

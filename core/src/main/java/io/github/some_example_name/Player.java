@@ -10,6 +10,7 @@ public class Player {
     Vector2 position;
     int rad;
     Trajectory trail;
+    boolean launched;
 
     public Player(int x, int y, int rad){
         position = new Vector2();
@@ -74,5 +75,13 @@ public class Player {
 
             vel.sub(delta.cpy().scl(vector1));
         }
+    }
+
+    public boolean getLaunched(){
+        return launched;
+    }
+
+    public void setLaunched(boolean launched){
+        this.launched = launched;
     }
 }
