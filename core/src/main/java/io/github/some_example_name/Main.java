@@ -41,7 +41,7 @@ public class Main extends ApplicationAdapter {
         sr = new ShapeRenderer();
         buttons = new ArrayList<>();
         planets = new ArrayList<>();
-        player = new Player(400,400,10);
+        player = new Player(200,200,10);
         player.setLaunched(false);
         mousePos = new Vector2();
         stage = new Stage(new ScreenViewport());
@@ -166,7 +166,7 @@ public class Main extends ApplicationAdapter {
 
         switch(currentScreen){
             case GAME:
-                // game loop
+
                 if(Gdx.input.isKeyJustPressed(Input.Keys.S)){
                     planets.add(new RealPlanet((int) mousePos.x, (int) mousePos.y, 20, 2));
                 }
@@ -186,7 +186,7 @@ public class Main extends ApplicationAdapter {
                         player.updatePos();
                     }
                 }
-                
+
                 Vector2 mouseForce = mousePos.cpy()
                     .sub(player.getPosition())
                     .scl(0.03f)
@@ -196,7 +196,7 @@ public class Main extends ApplicationAdapter {
                 mouseForce.limit(20f);
 
                 if(!player.getLaunched()){
-                    player.genTrail(planets,sr,mousePos);
+                    player.genTrail(planets,sr,mouseForce);
                 }
 
                 player.draw(sr);
