@@ -41,7 +41,7 @@ public class Main extends ApplicationAdapter {
         sr = new ShapeRenderer();
         buttons = new ArrayList<>();
         planets = new ArrayList<>();
-        player = new Player(200,200,10);
+        player = new Player(600,400,10);
         player.setLaunched(false);
         mousePos = new Vector2();
         stage = new Stage(new ScreenViewport());
@@ -176,9 +176,9 @@ public class Main extends ApplicationAdapter {
                     }
                     planet.draw(sr);
                     if (player.getLaunched()) {
-                        if (player.checkColPlanet(planet)) {
-                            player.moveCol(planet);
-                        }
+                        //if (player.checkColPlanet(planet)) {
+                        //    player.moveCol(planet);
+                        //}
                         Vector2 planetForce = planet.getPosition().cpy()
                             .sub(player.getPosition())
                             .setLength(planet.getDens() * planet.getSize() / 200f);
@@ -197,6 +197,10 @@ public class Main extends ApplicationAdapter {
 
                 if(!player.getLaunched()){
                     player.genTrail(planets,sr,mouseForce);
+                    if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
+                        player.setLaunched(true);
+                        player.applyForce(mouseForce);
+                    }
                 }
 
                 player.draw(sr);
