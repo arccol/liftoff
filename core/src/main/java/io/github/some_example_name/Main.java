@@ -186,7 +186,7 @@ public class Main extends ApplicationAdapter {
                         player.updatePos();
                     }
                 }
-
+                
                 Vector2 mouseForce = mousePos.cpy()
                     .sub(player.getPosition())
                     .scl(0.03f)
