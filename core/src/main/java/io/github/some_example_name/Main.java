@@ -214,8 +214,7 @@ public class Main extends ApplicationAdapter {
                             .sub(player.getPosition())
                             .scl(planet.getDens() * planet.getSize() / 20000f);
 
-                        player.applyForce(planetForce);
-                        System.out.println(planetForce.len());
+                        player.applyForce(planetForce.scl(1/planetForce.len()));
                     }
                 }
 
