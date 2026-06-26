@@ -74,6 +74,8 @@ public class Player {
             float vector1 = vel.dot(delta);
 
             vel.sub(delta.cpy().scl(vector1));
+
+            vel.scl(0.9f);
         }
     }
 

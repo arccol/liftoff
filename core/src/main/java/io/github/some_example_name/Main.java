@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -18,6 +19,7 @@ import jdk.javadoc.internal.doclets.formats.html.Table;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Main extends ApplicationAdapter {
     List<RealPlanet> planets;
@@ -35,15 +37,22 @@ public class Main extends ApplicationAdapter {
     }
     private Screen currentScreen;
     private boolean mDown;
+    private boolean mWasDown;
+    private int bufferFrames;
+    private boolean ready;
+    private Vector2 staticMousePos;
+    Random rand;
 
     @Override
     public void create() {
+        rand = new Random();
         sr = new ShapeRenderer();
         buttons = new ArrayList<>();
         planets = new ArrayList<>();
         player = new Player(600,400,10);
         player.setLaunched(false);
         mousePos = new Vector2();
+        staticMousePos = new Vector2();
         stage = new Stage(new ScreenViewport());
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         Gdx.input.setInputProcessor(stage);
@@ -71,6 +80,8 @@ public class Main extends ApplicationAdapter {
     }
 
     private void createHomeScreen(){
+        bufferFrames = 0;
+
         TextButton play = new TextButton("Play", skin);
         play.setPosition(565,350);
         play.setSize(150,80);
@@ -107,6 +118,8 @@ public class Main extends ApplicationAdapter {
     }
 
     private void createSettingsScreen(){
+        bufferFrames = 0;
+
         TextButton back = new TextButton("Back", skin);
         back.setPosition(0, 900);
         back.setSize(100, 60);
@@ -120,6 +133,8 @@ public class Main extends ApplicationAdapter {
     }
 
     private void createCustomiseScreen(){
+        bufferFrames = 0;
+
         TextButton back = new TextButton("Back", skin);
         back.setPosition(0, 900);
         back.setSize(100, 60);
@@ -134,6 +149,8 @@ public class Main extends ApplicationAdapter {
     }
 
     private void createGameScreen() {
+        bufferFrames = 0;
+
         TextButton back = new TextButton("Back", skin);
         back.setPosition(0, 900);
         back.setSize(100, 60);
@@ -155,12 +172,24 @@ public class Main extends ApplicationAdapter {
         stage.act(delta);
         stage.draw();
 
-        mDown = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+        if(ready) {
+            mDown = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+        }
+        if(!ready) {
+            ready = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.X)){
+            ready = false;
+        }
 
         mousePos.set(
             Gdx.input.getX(),
             Gdx.graphics.getHeight() - Gdx.input.getY()
         );
+
+        if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)){
+            staticMousePos.set(mousePos.cpy());
+        }
 
         sr.begin(ShapeRenderer.ShapeType.Filled);
 
@@ -168,7 +197,9 @@ public class Main extends ApplicationAdapter {
             case GAME:
 
                 if(Gdx.input.isKeyJustPressed(Input.Keys.S)){
-                    planets.add(new RealPlanet((int) mousePos.x, (int) mousePos.y, 20, 2));
+                    int rd = rand.nextInt(5);
+                    int rr = rand.nextInt(20)+5;
+                    planets.add(new RealPlanet((int) mousePos.x, (int) mousePos.y, rr, rd));
                 }
                 for(RealPlanet planet : planets) {
                     if (planet == null) {
@@ -176,36 +207,51 @@ public class Main extends ApplicationAdapter {
                     }
                     planet.draw(sr);
                     if (player.getLaunched()) {
-                        //if (player.checkColPlanet(planet)) {
-                        //    player.moveCol(planet);
-                        //}
+                        if(player.checkColPlanet(planet)) {
+                            player.moveCol(planet);
+                        }
                         Vector2 planetForce = planet.getPosition().cpy()
                             .sub(player.getPosition())
-                            .setLength(planet.getDens() * planet.getSize() / 200f);
+                            .scl(planet.getDens() * planet.getSize() / 20000f);
+
                         player.applyForce(planetForce);
-                        player.updatePos();
+                        System.out.println(planetForce.len());
                     }
                 }
 
+                player.updatePos();
+
                 Vector2 mouseForce = mousePos.cpy()
-                    .sub(player.getPosition())
+                    .sub(staticMousePos)
                     .scl(0.03f)
                     .scl(-1);
 
                 mouseForce.scl(mouseForce.len());
                 mouseForce.limit(20f);
 
-                if(!player.getLaunched()){
+                if(mDown&&!player.getLaunched()&&ready){
                     player.genTrail(planets,sr,mouseForce);
-                    if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
-                        player.setLaunched(true);
-                        player.applyForce(mouseForce);
-                    }
+                    sr.setColor(Color.DARK_GRAY);
+                    sr.circle(staticMousePos.x,staticMousePos.y,10);
+                    Vector2 ghostMouse = mousePos.cpy()
+                            .sub(staticMousePos)
+                            .limit(150)
+                            .add(staticMousePos);
+                    sr.rectLine(ghostMouse,staticMousePos,6);
+                    sr.circle(ghostMouse.x,ghostMouse.y,5);
+                    sr.setColor(Color.WHITE);
+                }
+
+                if(!player.getLaunched()&&!mDown&&mWasDown&&bufferFrames>10){
+                    player.setLaunched(true);
+                    player.applyForce(mouseForce);
                 }
 
                 player.draw(sr);
         }
         sr.end();
+        mWasDown = mDown;
+        bufferFrames++;
     }
 
     @Override

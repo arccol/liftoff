@@ -34,7 +34,7 @@ public class Trajectory {
                 }
                 Vector2 planetForce = planet.getPosition().cpy()
                     .sub(pos)
-                    .setLength(planet.getDens() * planet.getSize() / 200f);
+                    .scl(planet.getDens() * planet.getSize() / 20000f);
 
                 vel.add(planetForce);
             }
