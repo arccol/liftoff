@@ -63,19 +63,23 @@ public class Player {
 
         Vector2 delta = new Vector2(position).sub(target.position);
         float dist = delta.len();
+        if(dist == 0) return;
 
         float overlap = (rad + target.rad) - dist;
 
-        if (overlap > 0) {
+        if(overlap > 0) {
             delta.nor();
+            position.add(delta.cpy().scl(overlap));
 
-            position.add(delta.cpy().scl(overlap*rad/50));
+            float velocityIntoSurface = vel.dot(delta);
 
-            float vector1 = vel.dot(delta);
-
-            vel.sub(delta.cpy().scl(vector1));
+            if(velocityIntoSurface < 0) {
+                vel.sub(delta.cpy().scl(velocityIntoSurface));
+            }
 
             vel.scl(0.9f);
+
+            vel.add(delta.cpy().scl(0.1f));
         }
     }
 

@@ -4,28 +4,26 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
+import java.util.List;
+
 public class CoinSpawner {
-    Vector2 pos;
-    int rad;
+    List<Coin> coinList;
 
-    public CoinSpawner(int x, int y, int rad) {
-        pos = new Vector2(x, y);
-        this.rad = rad;
+    public CoinSpawner(List<Coin> coinList){
+        this.coinList = coinList;
     }
 
-    public void draw(ShapeRenderer sr) {
+    public void draw(ShapeRenderer sr){
         sr.setColor(Color.GOLD);
-        sr.circle(pos.x, pos.y, rad);
+        for(Coin coin : coinList){
+            sr.circle(coin.getPos().x, coin.getPos().y, coin.getSize());
+        }
         sr.setColor(Color.WHITE);
-
-        // create coin
     }
 
-    public boolean overlap(Vector2 target, int targetrad){
-        Vector2 targetPos;
-        targetPos = target;
-        float difference;
-        difference = pos.dst(targetPos);
-        return !(difference > rad + targetrad);
+    public void pickupCoins(Vector2 playerPos){
+        coinList.removeIf(coin -> coin.getPos().dst(playerPos) < coin.getSize() + 15
+        );
+
     }
 }

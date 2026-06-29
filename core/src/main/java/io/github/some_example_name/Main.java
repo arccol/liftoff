@@ -24,6 +24,8 @@ import java.util.Random;
 public class Main extends ApplicationAdapter {
     List<RealPlanet> planets;
     List<Button> buttons;
+    List<Coin> coinList;
+    CoinSpawner coinSpawner;
     Player player;
     ShapeRenderer sr;
     Vector2 mousePos;
@@ -45,6 +47,8 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void create() {
+        coinList = new ArrayList<>();
+        coinSpawner = new CoinSpawner(coinList);
         rand = new Random();
         sr = new ShapeRenderer();
         buttons = new ArrayList<>();
@@ -195,11 +199,13 @@ public class Main extends ApplicationAdapter {
 
         switch(currentScreen){
             case GAME:
-
                 if(Gdx.input.isKeyJustPressed(Input.Keys.S)){
                     int rd = rand.nextInt(4)+1;
-                    int rr = rand.nextInt(20)+5;
-                    planets.add(new RealPlanet((int) mousePos.x, (int) mousePos.y, rr, rd));
+                    int rr = rand.nextInt(40)+5;
+                    RealPlanet p = new RealPlanet((int) mousePos.x, (int) mousePos.y, rr, rd, coinList);
+                    p.generateCoins();
+                    planets.add(p);
+
                 }
                 for(RealPlanet planet : planets) {
                     if (planet == null) {
@@ -210,15 +216,30 @@ public class Main extends ApplicationAdapter {
                         if(player.checkColPlanet(planet)) {
                             player.moveCol(planet);
                         }
-                        Vector2 planetForce = planet.getPosition().cpy()
-                            .sub(player.getPosition())
-                            .scl(planet.getDens() * planet.getSize() / 20000f);
 
-                        player.applyForce(planetForce.scl((float) (1/Math.sqrt(planetForce.len()))));
+                        Vector2 planetDir = planet.getPosition().cpy()
+                            .sub(player.getPosition());
+
+                        float distance = planetDir.len();
+                        float gravityRadius = planet.getSize() * 100f;
+
+                        if(distance < gravityRadius && distance > 1) {
+                            planetDir.nor();
+
+                            float strength = (planet.getDens() * planet.getSize() * 20)
+                                / (distance * distance);
+
+                            strength = Math.min(strength, 5f);
+
+                            player.applyForce(
+                                planetDir.scl(strength)
+                            );
+                        }
                     }
                 }
 
                 player.updatePos();
+                coinSpawner.pickupCoins(player.getPosition());
 
                 Vector2 mouseForce = mousePos.cpy()
                     .sub(staticMousePos)
@@ -226,26 +247,34 @@ public class Main extends ApplicationAdapter {
                     .scl(-1);
 
                 mouseForce.scl(mouseForce.len());
-                mouseForce.limit(40f);
+                mouseForce.limit(10f);
 
-                if(mDown&&!player.getLaunched()&&ready){ // shoot from relative mouse pos
+                if(mDown&&!player.getLaunched()&&ready){ // visualise strength
                     player.genTrail(planets,sr,mouseForce);
                     Vector2 ghostMouse = mousePos.cpy()
                             .sub(staticMousePos)
-                            .limit(210)
+                            .limit(100)
                             .add(staticMousePos);
                     int length = (int) ghostMouse.cpy().sub(staticMousePos).len();
-                    sr.setColor(new Color((float)length/200,0.5f-(float)length/600,0.1f, 1));
+                    sr.setColor(new Color((float)length/100,0.5f-(float)length/300,0.1f, 1));
                     sr.rectLine(ghostMouse,staticMousePos,6);
                     sr.setColor(Color.DARK_GRAY);
                     sr.circle(staticMousePos.x,staticMousePos.y,10);
                     sr.circle(ghostMouse.x,ghostMouse.y,5);
+                    Vector2 direction = ghostMouse.cpy()
+                        .sub(staticMousePos)
+                        .nor()
+                        .scl(-1);
+                    int arrowLength = 20;
+                    Vector2 tip = staticMousePos.cpy()
+                        .add(direction.cpy().scl(arrowLength));
+                    Vector2 side = new Vector2(-direction.y,direction.x);
+                    Vector2 left = staticMousePos.cpy()
+                        .add(side.cpy().scl(10));
+                    Vector2 right = staticMousePos.cpy()
+                        .sub(side.cpy().scl(10));
+                    sr.triangle(tip.x,tip.y,left.x,left.y,right.x,right.y);
                     sr.setColor(Color.WHITE);
-
-                    // draw triangle to show direction of player movement
-                    // x1,y1,x2,y2 would be points on either side of circle, angle calculations needed
-                    // x3,y3 would be inverted ghostMouse, scaled down
-
                 }
 
                 if(!player.getLaunched()&&!mDown&&mWasDown&&bufferFrames>10){
@@ -254,6 +283,7 @@ public class Main extends ApplicationAdapter {
                 }
 
                 player.draw(sr);
+                coinSpawner.draw(sr);
         }
         sr.end();
         mWasDown = mDown;

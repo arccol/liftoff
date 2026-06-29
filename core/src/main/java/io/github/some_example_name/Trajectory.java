@@ -22,7 +22,7 @@ public class Trajectory {
         this.planets = planets;
         this.mouseForce = mouseForce;
         this.rad = rad;
-        leng = 500;
+        leng = 5000;
         markers = new Vector2[leng];
     }
 
@@ -37,11 +37,21 @@ public class Trajectory {
                 if(checkColPlanet(planet)) {
                     moveCol(planet);
                 }
-                Vector2 planetForce = planet.getPosition().cpy()
-                    .sub(pos)
-                    .scl(planet.getDens() * planet.getSize() / 20000f);
+                Vector2 planetDir = planet.getPosition().cpy()
+                    .sub(pos);
 
-                vel.add(planetForce.scl((float) (1/Math.sqrt(planetForce.len()))));
+                float distance = planetDir.len();
+                float gravityRadius = planet.getSize() * 100f;
+
+                if(distance < gravityRadius && distance > 1) {
+                    planetDir.nor();
+                    float strength = (planet.getDens() * planet.getSize() * 20)
+                        / (distance * distance);
+
+                    strength = Math.min(strength, 5f);
+
+                    vel.add(planetDir.scl(strength));
+                }
             }
             pos.add(vel);
             markers[i].set(pos.cpy());
@@ -71,19 +81,23 @@ public class Trajectory {
 
         Vector2 delta = new Vector2(pos).sub(target.position);
         float dist = delta.len();
+        if(dist == 0) return;
 
         float overlap = (rad + target.rad) - dist;
 
-        if (overlap > 0) {
+        if(overlap > 0) {
             delta.nor();
+            pos.add(delta.cpy().scl(overlap));
 
-            pos.add(delta.cpy().scl(overlap*rad/50));
+            float velocityIntoSurface = vel.dot(delta);
 
-            float vector1 = vel.dot(delta);
-
-            vel.sub(delta.cpy().scl(vector1));
+            if(velocityIntoSurface < 0) {
+                vel.sub(delta.cpy().scl(velocityIntoSurface));
+            }
 
             vel.scl(0.9f);
+
+            vel.add(delta.cpy().scl(0.1f));
         }
     }
 
