@@ -178,7 +178,7 @@ public class Main extends ApplicationAdapter {
         if(!ready) {
             ready = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
         }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.X)){
+        if(Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)){
             ready = false;
         }
 
@@ -197,7 +197,7 @@ public class Main extends ApplicationAdapter {
             case GAME:
 
                 if(Gdx.input.isKeyJustPressed(Input.Keys.S)){
-                    int rd = rand.nextInt(5);
+                    int rd = rand.nextInt(4)+1;
                     int rr = rand.nextInt(20)+5;
                     planets.add(new RealPlanet((int) mousePos.x, (int) mousePos.y, rr, rd));
                 }
@@ -214,7 +214,7 @@ public class Main extends ApplicationAdapter {
                             .sub(player.getPosition())
                             .scl(planet.getDens() * planet.getSize() / 20000f);
 
-                        player.applyForce(planetForce.scl(1/planetForce.len()));
+                        player.applyForce(planetForce.scl((float) (1/Math.sqrt(planetForce.len()))));
                     }
                 }
 
@@ -226,19 +226,26 @@ public class Main extends ApplicationAdapter {
                     .scl(-1);
 
                 mouseForce.scl(mouseForce.len());
-                mouseForce.limit(20f);
+                mouseForce.limit(40f);
 
-                if(mDown&&!player.getLaunched()&&ready){
+                if(mDown&&!player.getLaunched()&&ready){ // shoot from relative mouse pos
                     player.genTrail(planets,sr,mouseForce);
-                    sr.setColor(Color.DARK_GRAY);
-                    sr.circle(staticMousePos.x,staticMousePos.y,10);
                     Vector2 ghostMouse = mousePos.cpy()
                             .sub(staticMousePos)
-                            .limit(150)
+                            .limit(210)
                             .add(staticMousePos);
+                    int length = (int) ghostMouse.cpy().sub(staticMousePos).len();
+                    sr.setColor(new Color((float)length/200,0.5f-(float)length/600,0.1f, 1));
                     sr.rectLine(ghostMouse,staticMousePos,6);
+                    sr.setColor(Color.DARK_GRAY);
+                    sr.circle(staticMousePos.x,staticMousePos.y,10);
                     sr.circle(ghostMouse.x,ghostMouse.y,5);
                     sr.setColor(Color.WHITE);
+
+                    // draw triangle to show direction of player movement
+                    // x1,y1,x2,y2 would be points on either side of circle, angle calculations needed
+                    // x3,y3 would be inverted ghostMouse, scaled down
+
                 }
 
                 if(!player.getLaunched()&&!mDown&&mWasDown&&bufferFrames>10){

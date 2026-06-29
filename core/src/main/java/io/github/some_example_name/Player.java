@@ -39,7 +39,7 @@ public class Player {
     }
 
     public void genTrail(List<RealPlanet> planets, ShapeRenderer sr, Vector2 mouseForce){
-        trail = new Trajectory(vel, position, planets, sr, mouseForce);
+        trail = new Trajectory(vel, position, planets, sr, mouseForce, rad);
         trail.generate();
     }
 
