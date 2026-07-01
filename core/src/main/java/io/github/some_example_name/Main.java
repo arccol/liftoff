@@ -185,6 +185,9 @@ public class Main extends ApplicationAdapter {
         if(Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)){
             ready = false;
         }
+        if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)){
+            bufferFrames=0;
+        }
 
         mousePos.set(
             Gdx.input.getX(),
@@ -249,7 +252,7 @@ public class Main extends ApplicationAdapter {
                 mouseForce.scl(mouseForce.len());
                 mouseForce.limit(10f);
 
-                if(mDown&&!player.getLaunched()&&ready){ // visualise strength
+                if(mDown&&!player.getLaunched()&&ready){
                     player.genTrail(planets,sr,mouseForce);
                     Vector2 ghostMouse = mousePos.cpy()
                             .sub(staticMousePos)
@@ -277,7 +280,7 @@ public class Main extends ApplicationAdapter {
                     sr.setColor(Color.WHITE);
                 }
 
-                if(!player.getLaunched()&&!mDown&&mWasDown&&bufferFrames>10){
+                if(!player.getLaunched()&&!mDown&&mWasDown&&bufferFrames>30){
                     player.setLaunched(true);
                     player.applyForce(mouseForce);
                 }
