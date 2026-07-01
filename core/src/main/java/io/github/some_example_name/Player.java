@@ -90,4 +90,8 @@ public class Player {
     public void setLaunched(boolean launched){
         this.launched = launched;
     }
+
+    public Vector2 getVel(){
+        return vel;
+    }
 }

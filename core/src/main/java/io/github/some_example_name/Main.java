@@ -285,6 +285,10 @@ public class Main extends ApplicationAdapter {
                     player.applyForce(mouseForce);
                 }
 
+                if(!player.getLaunched()&&player.getVel().len()<0.5f){
+                    bufferFrames=0;
+                }
+
                 player.draw(sr);
                 coinSpawner.draw(sr);
         }
