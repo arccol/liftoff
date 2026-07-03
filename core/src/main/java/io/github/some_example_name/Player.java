@@ -56,11 +56,7 @@ public class Player {
         targetPos = target.position;
         float difference;
         difference = position.dst(targetPos);
-        if(difference>rad+target.rad){
-            return false;
-        }else{
-            return true;
-        }
+        return !(difference > rad + target.rad);
     }
 
     public void moveCol(RealPlanet target) {
