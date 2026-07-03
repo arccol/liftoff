@@ -23,7 +23,6 @@ import java.util.Random;
 
 public class Main extends ApplicationAdapter {
     List<RealPlanet> planets;
-    List<Button> buttons;
     List<Coin> coinList;
     CoinSpawner coinSpawner;
     Player player;
@@ -51,7 +50,6 @@ public class Main extends ApplicationAdapter {
         coinSpawner = new CoinSpawner(coinList);
         rand = new Random();
         sr = new ShapeRenderer();
-        buttons = new ArrayList<>();
         planets = new ArrayList<>();
         player = new Player(600,400,10);
         player.setLaunched(false);
