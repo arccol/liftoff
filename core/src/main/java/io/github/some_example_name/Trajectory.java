@@ -59,9 +59,11 @@ public class Trajectory {
         dropmarkers(markers);
     }
 
-    public void dropmarkers(Vector2[] marks){
-        for(Vector2 mark : marks){
-            sr.circle(mark.x,mark.y,1f);
+    public void dropmarkers(Vector2[] marks) {
+        for(int i = 0; i < marks.length; i++) {
+            if (2f / (i/300f + 1) > 0.3) {
+                sr.circle(marks[i].x, marks[i].y, 2f / (i / 300f + 1));
+            }
         }
     }
 

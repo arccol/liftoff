@@ -218,6 +218,10 @@ public class Main extends ApplicationAdapter {
                     if (player.getLaunched()) {
                         if(player.checkColPlanet(planet)) {
                             player.moveCol(planet);
+                            if(player.getDis().len()<1f&&!player.getAbletolaunch()&&bufferFrames>5){
+                                bufferFrames=0;
+                                player.setAbletolaunch(true);
+                            }
                         }
 
                         Vector2 planetDir = planet.getPosition().cpy()
@@ -252,7 +256,7 @@ public class Main extends ApplicationAdapter {
                 mouseForce.scl(mouseForce.len());
                 mouseForce.limit(10f);
 
-                if(mDown&&!player.getLaunched()&&ready){
+                if(mDown&&(!player.getLaunched()||player.getAbletolaunch())&&ready){
                     player.genTrail(planets,sr,mouseForce);
                     Vector2 ghostMouse = mousePos.cpy()
                             .sub(staticMousePos)
@@ -280,13 +284,12 @@ public class Main extends ApplicationAdapter {
                     sr.setColor(Color.WHITE);
                 }
 
-                if(!player.getLaunched()&&!mDown&&mWasDown&&bufferFrames>30){
-                    player.setLaunched(true);
-                    player.applyForce(mouseForce);
-                }
 
-                if(!player.getLaunched()&&player.getVel().len()<0.5f){
+                if((!player.getLaunched()||player.getAbletolaunch())&&!mDown&&mWasDown&&bufferFrames>30){
                     bufferFrames=0;
+                    player.setLaunched(true);
+                    player.setAbletolaunch(false);
+                    player.applyForce(mouseForce);
                 }
 
                 player.draw(sr);
