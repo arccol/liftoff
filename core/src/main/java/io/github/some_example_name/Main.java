@@ -262,7 +262,7 @@ public class Main extends ApplicationAdapter {
                             .add(staticMousePos);
                     int length = (int) ghostMouse.cpy().sub(staticMousePos).len();
                     sr.setColor(new Color((float)length/100,0.5f-(float)length/300,0.1f, 1));
-                    sr.rectLine(ghostMouse,staticMousePos,6);
+                    sr.rectLine(ghostMouse,staticMousePos,7-((float)length/30));
                     sr.setColor(Color.DARK_GRAY);
                     sr.circle(staticMousePos.x,staticMousePos.y,10);
                     sr.circle(ghostMouse.x,ghostMouse.y,5);
