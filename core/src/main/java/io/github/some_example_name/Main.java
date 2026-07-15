@@ -200,98 +200,7 @@ public class Main extends ApplicationAdapter {
 
         switch(currentScreen){
             case GAME:
-                if(Gdx.input.isKeyJustPressed(Input.Keys.S)){
-                    int rd = rand.nextInt(4)+1;
-                    int rr = rand.nextInt(40)+5;
-                    RealPlanet p = new RealPlanet((int) mousePos.x, (int) mousePos.y, rr, rd, coinList);
-                    p.generateCoins();
-                    planets.add(p);
-
-                }
-                for(RealPlanet planet : planets) {
-                    if (planet == null) {
-                        continue;
-                    }
-                    planet.draw(sr);
-                    if (player.getLaunched()) {
-                        if(player.checkColPlanet(planet)) {
-                            player.moveCol(planet);
-                            if(player.getDis().len()<1f&&!player.getAbletolaunch()&&bufferFrames>5){
-                                bufferFrames=0;
-                                player.setAbletolaunch(true);
-                            }
-                        }
-
-                        Vector2 planetDir = planet.getPosition().cpy()
-                            .sub(player.getPosition());
-
-                        float distance = planetDir.len();
-                        float gravityRadius = planet.getSize() * 100f;
-
-                        if(distance < gravityRadius && distance > 1) {
-                            planetDir.nor();
-
-                            float strength = (planet.getDens() * planet.getSize() * 20)
-                                / (distance * distance);
-
-                            strength = Math.min(strength, 5f);
-
-                            player.applyForce(
-                                planetDir.scl(strength)
-                            );
-                        }
-                    }
-                }
-
-                player.updatePos();
-                coinSpawner.pickupCoins(player.getPosition());
-
-                Vector2 mouseForce = mousePos.cpy()
-                    .sub(staticMousePos)
-                    .scl(0.03f)
-                    .scl(-1);
-
-                mouseForce.scl(mouseForce.len());
-                mouseForce.limit(10f);
-
-                if(mDown&&(!player.getLaunched()||player.getAbletolaunch())&&ready){
-                    player.genTrail(planets,sr,mouseForce);
-                    Vector2 ghostMouse = mousePos.cpy()
-                            .sub(staticMousePos)
-                            .limit(100)
-                            .add(staticMousePos);
-                    int length = (int) ghostMouse.cpy().sub(staticMousePos).len();
-                    sr.setColor(new Color((float)length/100,0.5f-(float)length/300,0.1f, 1));
-                    sr.rectLine(ghostMouse,staticMousePos,7-((float)length/30));
-                    sr.setColor(Color.DARK_GRAY);
-                    sr.circle(staticMousePos.x,staticMousePos.y,10);
-                    sr.circle(ghostMouse.x,ghostMouse.y,5);
-                    Vector2 direction = ghostMouse.cpy()
-                        .sub(staticMousePos)
-                        .nor()
-                        .scl(-1);
-                    int arrowLength = 20;
-                    Vector2 tip = staticMousePos.cpy()
-                        .add(direction.cpy().scl(arrowLength));
-                    Vector2 side = new Vector2(-direction.y,direction.x);
-                    Vector2 left = staticMousePos.cpy()
-                        .add(side.cpy().scl(10));
-                    Vector2 right = staticMousePos.cpy()
-                        .sub(side.cpy().scl(10));
-                    sr.triangle(tip.x,tip.y,left.x,left.y,right.x,right.y);
-                    sr.setColor(Color.WHITE);
-                }
-
-
-                if((!player.getLaunched()||player.getAbletolaunch())&&!mDown&&mWasDown&&bufferFrames>30){
-                    bufferFrames=0;
-                    player.setLaunched(true);
-                    player.setAbletolaunch(false);
-                    player.applyForce(mouseForce);
-                }
-
-                player.draw(sr);
-                coinSpawner.draw(sr);
+                gameLoop();
         }
         sr.end();
         mWasDown = mDown;
@@ -306,5 +215,100 @@ public class Main extends ApplicationAdapter {
 
     public void resize(int width, int height){
         stage.getViewport().update(width, height, true);
+    }
+
+    public void gameLoop(){
+        if(Gdx.input.isKeyJustPressed(Input.Keys.S)){
+            int rd = rand.nextInt(4)+1;
+            int rr = rand.nextInt(80)+5;
+            RealPlanet p = new RealPlanet((int) mousePos.x, (int) mousePos.y, rr, rd, coinList);
+            p.generateCoins();
+            planets.add(p);
+
+        }
+        for(RealPlanet planet : planets) {
+            if (planet == null) {
+                continue;
+            }
+            planet.draw(sr);
+            if (player.getLaunched()) {
+                if(player.checkColPlanet(planet)) {
+                    player.moveCol(planet);
+                    if(player.getDis().len()<1f&&!player.getAbletolaunch()&&bufferFrames>5){
+                        bufferFrames=0;
+                        player.setAbletolaunch(true);
+                    }
+                }
+
+                Vector2 planetDir = planet.getPosition().cpy()
+                    .sub(player.getPosition());
+
+                float distance = planetDir.len();
+                float gravityRadius = planet.getSize() * 100f;
+
+                if(distance < gravityRadius && distance > 1) {
+                    planetDir.nor();
+
+                    float strength = (planet.getDens() * planet.getSize() * 20)
+                        / (distance * distance);
+
+                    strength = Math.min(strength, 5f);
+
+                    player.applyForce(
+                        planetDir.scl(strength)
+                    );
+                }
+            }
+        }
+
+        player.updatePos();
+        coinSpawner.pickupCoins(player.getPosition());
+
+        Vector2 mouseForce = mousePos.cpy()
+            .sub(staticMousePos)
+            .scl(0.03f)
+            .scl(-1);
+
+        mouseForce.scl(mouseForce.len());
+        mouseForce.limit(10f);
+
+        if(mDown&&(!player.getLaunched()||player.getAbletolaunch())&&ready){
+            player.genTrail(planets,sr,mouseForce);
+            Vector2 ghostMouse = mousePos.cpy()
+                .sub(staticMousePos)
+                .limit(100)
+                .add(staticMousePos);
+            int length = (int) ghostMouse.cpy().sub(staticMousePos).len();
+            sr.setColor(new Color((float)length/100,0.5f-(float)length/300,0.1f, 1));
+            sr.rectLine(ghostMouse,staticMousePos,7-((float)length/30));
+            sr.setColor(Color.DARK_GRAY);
+            sr.circle(staticMousePos.x,staticMousePos.y,10);
+            sr.circle(ghostMouse.x,ghostMouse.y,5);
+            Vector2 direction = ghostMouse.cpy()
+                .sub(staticMousePos)
+                .nor()
+                .scl(-1);
+            int arrowLength = 20;
+            Vector2 tip = staticMousePos.cpy()
+                .add(direction.cpy().scl(arrowLength));
+            Vector2 side = new Vector2(-direction.y,direction.x);
+            Vector2 left = staticMousePos.cpy()
+                .add(side.cpy().scl(10));
+            Vector2 right = staticMousePos.cpy()
+                .sub(side.cpy().scl(10));
+            sr.triangle(tip.x,tip.y,left.x,left.y,right.x,right.y);
+            sr.setColor(Color.WHITE);
+        }
+
+
+        if((!player.getLaunched()||player.getAbletolaunch())&&!mDown&&mWasDown&&bufferFrames>30){
+            bufferFrames=0;
+            player.setLaunched(true);
+            player.setAbletolaunch(false);
+            player.applyForce(mouseForce);
+        }
+
+        player.draw(sr);
+        coinSpawner.draw(sr);
     }
 }
