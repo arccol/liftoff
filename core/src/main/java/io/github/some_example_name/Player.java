@@ -78,7 +78,6 @@ public class Player {
             }
 
             vel.scl(0.9f);
-
             vel.add(delta.cpy().scl(0.1f));
         }
     }

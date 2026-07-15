@@ -28,6 +28,7 @@ public class Main extends ApplicationAdapter {
     Player player;
     ShapeRenderer sr;
     Vector2 mousePos;
+    private Goal goal;
     private Stage stage;
     private Skin skin;
     enum Screen{
@@ -201,6 +202,7 @@ public class Main extends ApplicationAdapter {
         switch(currentScreen){
             case GAME:
                 gameLoop();
+                break;
         }
         sr.end();
         mWasDown = mDown;

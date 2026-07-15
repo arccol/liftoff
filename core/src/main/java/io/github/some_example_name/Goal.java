@@ -29,6 +29,7 @@ public class Goal {
         sr.setColor(new Color(1-((float) dens /5),1-((float) dens /5),1-((float) dens /5),1)); // darker = denser
         sr.circle(position.x, position.y,rad);
         sr.setColor(Color.WHITE);
+        sr.rectLine(position,position.cpy().add(randomVec),10);
     }
 
     public int getDens(){
