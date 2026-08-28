@@ -8,21 +8,25 @@ public class Player {
     Vector2 vel;
     Vector2 accel;
     Vector2 position;
+    Vector2 prevpos;
     int rad;
     Trajectory trail;
     boolean launched;
+    boolean abletolaunch;
 
     public Player(int x, int y, int rad){
         position = new Vector2();
         accel = new Vector2();
         vel = new Vector2();
         position.set(x,y);
+        prevpos = new Vector2();
         this.rad = rad;
         accel.set(0,0);
         vel.set(0,0);
     }
 
     public void updatePos(){
+        prevpos.set(position);
         position.add(vel);
     }
 
@@ -52,11 +56,7 @@ public class Player {
         targetPos = target.position;
         float difference;
         difference = position.dst(targetPos);
-        if(difference>rad+target.rad){
-            return false;
-        }else{
-            return true;
-        }
+        return !(difference > rad + target.rad);
     }
 
     public void moveCol(RealPlanet target) {
@@ -78,7 +78,6 @@ public class Player {
             }
 
             vel.scl(0.9f);
-
             vel.add(delta.cpy().scl(0.1f));
         }
     }
@@ -89,5 +88,21 @@ public class Player {
 
     public void setLaunched(boolean launched){
         this.launched = launched;
+    }
+
+    public Vector2 getVel(){
+        return vel;
+    }
+
+    public Vector2 getDis(){
+        return prevpos.cpy().sub(position);
+    }
+
+    public void setAbletolaunch(boolean abletolaunch){
+        this.abletolaunch = abletolaunch;
+    }
+
+    public boolean getAbletolaunch(){
+        return abletolaunch;
     }
 }

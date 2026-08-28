@@ -8,9 +8,11 @@ import java.util.List;
 
 public class CoinSpawner {
     List<Coin> coinList;
+    int totalcoins;
 
     public CoinSpawner(List<Coin> coinList){
         this.coinList = coinList;
+        totalcoins = 0;
     }
 
     public void draw(ShapeRenderer sr){
@@ -22,8 +24,20 @@ public class CoinSpawner {
     }
 
     public void pickupCoins(Vector2 playerPos){
-        coinList.removeIf(coin -> coin.getPos().dst(playerPos) < coin.getSize() + 15
-        );
+        for(Coin coin : coinList){
+            if(coin.getPos().dst(playerPos)<coin.getSize()+15){
+                coinList.remove(coin);
+                totalcoins++;
+                break;
+            }
+        }
+    }
 
+    public int getCoins(){
+        return totalcoins;
+    }
+
+    public void updateCoins(int amount){
+        totalcoins+=amount;
     }
 }
