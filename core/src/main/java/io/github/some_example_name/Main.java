@@ -46,6 +46,14 @@ public class Main extends ApplicationAdapter {
     private float volume = 1.0f;
     private String selectedResolution;
     Random rand;
+    List<InvenPlanet> potPlanets;
+    InvenPlanet selectedInvenPlanet;
+    Vector2 potCenter;
+    float potRadius;
+    private static final float POT_OPENING_HALF_DEG = 35f;
+    private static final float POT_LOSS_MARGIN = 40f;
+
+    private boolean inventoryDrag;
 
     @Override
     public void create() {
@@ -58,6 +66,14 @@ public class Main extends ApplicationAdapter {
         player.setLaunched(false);
         mousePos = new Vector2();
         staticMousePos = new Vector2();
+
+        potPlanets = new ArrayList<>();
+        potCenter = new Vector2(Gdx.graphics.getWidth() - 150, 130);
+        potRadius = 100;
+        for(int i = 0; i < 8; i++){
+            spawnPotPlanet();
+        }
+
         stage = new Stage(new ScreenViewport());
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         Gdx.input.setInputProcessor(stage);
@@ -67,6 +83,9 @@ public class Main extends ApplicationAdapter {
 
     public void changeScreen(Screen screen){
         currentScreen = screen;
+        if(screen != Screen.GAME){
+            selectedInvenPlanet = null;
+        }
         stage.clear();
         switch(screen){
             case HOME:
@@ -202,6 +221,7 @@ public class Main extends ApplicationAdapter {
 
     private void createGameScreen() {
         bufferFrames = 0;
+        selectedInvenPlanet = null;
 
         TextButton back = new TextButton("Back", skin);
         back.setPosition(0, 900);
@@ -216,6 +236,68 @@ public class Main extends ApplicationAdapter {
         stage.addActor(back);
     }
 
+
+    private void spawnPotPlanet(){
+        int rr = rand.nextInt(13) + 8;
+        int rd = rand.nextInt(4) + 1;
+        float spawnX = potCenter.x + (rand.nextFloat() - 0.5f) * (potRadius * 0.8f);
+        float spawnY = potCenter.y + potRadius + 60 + rand.nextFloat() * 60;
+        potPlanets.add(new InvenPlanet((int) spawnX, (int) spawnY, rr, rd));
+    }
+
+    private void updatePot(){
+        for(InvenPlanet p : potPlanets){
+            p.applyGrav();
+            p.updatePos();
+            p.constrainToPot(potCenter, potRadius, POT_OPENING_HALF_DEG);
+        }
+        for(int i = 0; i < potPlanets.size(); i++){
+            for(int j = i + 1; j < potPlanets.size(); j++){
+                InvenPlanet a = potPlanets.get(i);
+                InvenPlanet b = potPlanets.get(j);
+                if(a.checkColPlanet(b)){
+                    a.hitCirc(b);
+                }
+            }
+        }
+
+        potPlanets.removeIf(p -> {
+            boolean lost = p.position.dst(potCenter) > potRadius + p.r + POT_LOSS_MARGIN;
+            if(lost && p == selectedInvenPlanet){
+                selectedInvenPlanet = null;
+            }
+            return lost;
+        });
+    }
+
+    private void drawPot(ShapeRenderer sr){
+        float closedStart = 90f + POT_OPENING_HALF_DEG;
+        float closedDegrees = 360f - (POT_OPENING_HALF_DEG * 2f);
+
+        sr.setColor(new Color(0.35f, 0.22f, 0.12f, 1f));
+        sr.arc(potCenter.x, potCenter.y, potRadius + 14, closedStart, closedDegrees);
+        sr.setColor(new Color(0.15f, 0.15f, 0.2f, 1f));
+        sr.arc(potCenter.x, potCenter.y, potRadius, closedStart, closedDegrees);
+
+        for(InvenPlanet p : potPlanets){
+            p.draw(sr, p == selectedInvenPlanet);
+        }
+    }
+
+    private InvenPlanet getPotPlanetAt(Vector2 pos){
+        for(int i = potPlanets.size() - 1; i >= 0; i--){
+            InvenPlanet p = potPlanets.get(i);
+            if(p.overlap(pos.x, pos.y)){
+                return p;
+            }
+        }
+        return null;
+    }
+
+    private boolean isOverPot(Vector2 pos){
+        return potCenter.dst(pos) <= potRadius + 14;
+    }
+
     @Override
     public void render() {
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
@@ -224,22 +306,56 @@ public class Main extends ApplicationAdapter {
         stage.act(delta);
         stage.draw();
 
-        if(ready) {
-            mDown = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
-        }
-        if(!ready) {
-            ready = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
-        }
-        if(Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)){
-            ready = false;
-        }
-
         mousePos.set(
             Gdx.input.getX(),
             Gdx.graphics.getHeight() - Gdx.input.getY()
         );
 
-        if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)){
+        boolean leftDown = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+        boolean leftJustPressed = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
+
+        if(leftJustPressed){
+            inventoryDrag = false;
+            if(currentScreen == Screen.GAME){
+                InvenPlanet clickedMarble = getPotPlanetAt(mousePos);
+                if(clickedMarble != null){
+                    selectedInvenPlanet = (selectedInvenPlanet == clickedMarble) ? null : clickedMarble;
+                    inventoryDrag = true;
+                } else if(isOverPot(mousePos)){
+
+                    inventoryDrag = true;
+                } else if(selectedInvenPlanet != null){
+                    RealPlanet placed = new RealPlanet(
+                        (int) mousePos.x, (int) mousePos.y,
+                        selectedInvenPlanet.r, selectedInvenPlanet.dens, coinList
+                    );
+                    placed.generateCoins();
+                    planets.add(placed);
+
+                    potPlanets.remove(selectedInvenPlanet);
+                    selectedInvenPlanet = null;
+                    spawnPotPlanet();
+
+                    inventoryDrag = true;
+                }
+            }
+        }
+        if(!leftDown){
+            inventoryDrag = false;
+        }
+
+        if(ready) {
+            mDown = leftDown && !inventoryDrag;
+        }
+        if(!ready) {
+            ready = leftJustPressed && !inventoryDrag;
+        }
+        if(Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)){
+            ready = false;
+            selectedInvenPlanet = null;
+        }
+
+        if(leftJustPressed && !inventoryDrag){
             staticMousePos.set(mousePos.cpy());
         }
 
@@ -247,14 +363,8 @@ public class Main extends ApplicationAdapter {
 
         switch(currentScreen){
             case GAME:
-                if(Gdx.input.isKeyJustPressed(Input.Keys.S)){
-                    int rd = rand.nextInt(4)+1;
-                    int rr = rand.nextInt(40)+5;
-                    RealPlanet p = new RealPlanet((int) mousePos.x, (int) mousePos.y, rr, rd, coinList);
-                    p.generateCoins();
-                    planets.add(p);
+                updatePot();
 
-                }
                 for(RealPlanet planet : planets) {
                     if (planet == null) {
                         continue;
@@ -300,9 +410,9 @@ public class Main extends ApplicationAdapter {
                 if(mDown&&!player.getLaunched()&&ready){ // visualise strength
                     player.genTrail(planets,sr,mouseForce);
                     Vector2 ghostMouse = mousePos.cpy()
-                            .sub(staticMousePos)
-                            .limit(100)
-                            .add(staticMousePos);
+                        .sub(staticMousePos)
+                        .limit(100)
+                        .add(staticMousePos);
                     int length = (int) ghostMouse.cpy().sub(staticMousePos).len();
                     sr.setColor(new Color((float)length/100,0.5f-(float)length/300,0.1f, 1));
                     sr.rectLine(ghostMouse,staticMousePos,6);
@@ -332,6 +442,8 @@ public class Main extends ApplicationAdapter {
 
                 player.draw(sr);
                 coinSpawner.draw(sr);
+
+                drawPot(sr);
         }
         sr.end();
         mWasDown = mDown;
