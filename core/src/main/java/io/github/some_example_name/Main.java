@@ -9,8 +9,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.*;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -23,7 +23,6 @@ import java.util.Random;
 
 public class Main extends ApplicationAdapter {
     List<RealPlanet> planets;
-    List<Button> buttons;
     List<Coin> coinList;
     CoinSpawner coinSpawner;
     Player player;
@@ -43,6 +42,9 @@ public class Main extends ApplicationAdapter {
     private int bufferFrames;
     private boolean ready;
     private Vector2 staticMousePos;
+    private int targetFps = 60;
+    private float volume = 1.0f;
+    private String selectedResolution;
     Random rand;
 
     @Override
@@ -51,7 +53,6 @@ public class Main extends ApplicationAdapter {
         coinSpawner = new CoinSpawner(coinList);
         rand = new Random();
         sr = new ShapeRenderer();
-        buttons = new ArrayList<>();
         planets = new ArrayList<>();
         player = new Player(600,400,10);
         player.setLaunched(false);
@@ -124,8 +125,55 @@ public class Main extends ApplicationAdapter {
     private void createSettingsScreen(){
         bufferFrames = 0;
 
+        Label title = new Label("Settings", skin);
+        title.setPosition(520, 760);
+        title.setSize(300, 60);
+        stage.addActor(title);
+
+        Label volumeLabel = new Label("Volume", skin);
+        volumeLabel.setPosition(400, 500);
+        volumeLabel.setSize(180, 50);
+
+        Slider volumeSlider = new Slider(0f, 1f, 0.01f, false, skin);
+        volumeSlider.setValue(volume);
+        volumeSlider.setPosition(600, 515);
+        volumeSlider.setSize(220, 30);
+
+        Label volumeValue = new Label((int)(volume * 100) + "%", skin);
+        volumeValue.setPosition(840, 500);
+        volumeValue.setSize(100, 50);
+        volumeSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                volume = volumeSlider.getValue();
+                volumeValue.setText((int)(volume * 100) + "%");
+            }
+        });
+        stage.addActor(volumeLabel);
+        stage.addActor(volumeSlider);
+        stage.addActor(volumeValue);
+
+        Label fpsLabel = new Label("Framerate", skin);
+        fpsLabel.setPosition(400, 380);
+        fpsLabel.setSize(180, 50);
+
+        SelectBox<String> fpsBox = new SelectBox<>(skin);
+        fpsBox.setItems("30 FPS", "60 FPS", "120 FPS", "144 FPS");
+        fpsBox.setSelected(targetFps + " FPS");
+        fpsBox.setPosition(600, 380);
+        fpsBox.setSize(220, 50);
+        fpsBox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                targetFps = Integer.parseInt(fpsBox.getSelected().replace(" FPS", ""));
+                Gdx.graphics.setForegroundFPS(targetFps);
+            }
+        });
+        stage.addActor(fpsLabel);
+        stage.addActor(fpsBox);
+
         TextButton back = new TextButton("Back", skin);
-        back.setPosition(0, 900);
+        back.setPosition(0, Gdx.graphics.getHeight() - 60);
         back.setSize(100, 60);
         back.addListener(new ClickListener() {
             @Override
