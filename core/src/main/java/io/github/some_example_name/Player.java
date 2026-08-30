@@ -1,5 +1,6 @@
 package io.github.some_example_name;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import java.util.List;
@@ -12,7 +13,6 @@ public class Player {
     int rad;
     Trajectory trail;
     boolean launched;
-    boolean abletolaunch;
 
     public Player(int x, int y, int rad){
         position = new Vector2();
@@ -30,11 +30,16 @@ public class Player {
         position.add(vel);
     }
 
+    public boolean getStopped(){
+        return (prevpos.sub(position).len()<0.05f);
+    }
+
     public void applyForce(Vector2 force) {
         vel.add(force);
     }
 
     public void draw(ShapeRenderer sr){
+        sr.setColor(Color.WHITE);
         sr.circle(position.x, position.y,rad);
     }
 
@@ -96,13 +101,5 @@ public class Player {
 
     public Vector2 getDis(){
         return prevpos.cpy().sub(position);
-    }
-
-    public void setAbletolaunch(boolean abletolaunch){
-        this.abletolaunch = abletolaunch;
-    }
-
-    public boolean getAbletolaunch(){
-        return abletolaunch;
     }
 }

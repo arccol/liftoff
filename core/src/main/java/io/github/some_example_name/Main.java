@@ -2,7 +2,6 @@ package io.github.some_example_name;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -14,9 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import jdk.javadoc.internal.doclets.formats.html.Table;
 
-import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -44,14 +41,14 @@ public class Main extends ApplicationAdapter {
     private Vector2 staticMousePos;
     private int targetFps = 60;
     private float volume = 1.0f;
-    private String selectedResolution;
     Random rand;
     List<InvenPlanet> potPlanets;
     InvenPlanet selectedInvenPlanet;
     Vector2 potCenter;
     float potRadius;
-    private static final float POT_OPENING_HALF_DEG = 35f;
-    private static final float POT_LOSS_MARGIN = 40f;
+    private static final float potTopDegree = 35f;
+    private static final float lossMargin = 40f;
+    private static final int iterations = 100;
 
     private boolean inventoryDrag;
 
@@ -70,10 +67,6 @@ public class Main extends ApplicationAdapter {
         potPlanets = new ArrayList<>();
         potCenter = new Vector2(Gdx.graphics.getWidth() - 150, 130);
         potRadius = 100;
-        for(int i = 0; i < 8; i++){
-            spawnPotPlanet();
-        }
-
         stage = new Stage(new ScreenViewport());
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         Gdx.input.setInputProcessor(stage);
@@ -238,10 +231,10 @@ public class Main extends ApplicationAdapter {
 
 
     private void spawnPotPlanet(){
-        int rr = rand.nextInt(13) + 8;
+        int rr = rand.nextInt(20) + 20;
         int rd = rand.nextInt(4) + 1;
-        float spawnX = potCenter.x + (rand.nextFloat() - 0.5f) * (potRadius * 0.8f);
-        float spawnY = potCenter.y + potRadius + 60 + rand.nextFloat() * 60;
+        float spawnX = potCenter.x-2+rd;
+        float spawnY = potCenter.y + potRadius + 30;
         potPlanets.add(new InvenPlanet((int) spawnX, (int) spawnY, rr, rd));
     }
 
@@ -249,20 +242,26 @@ public class Main extends ApplicationAdapter {
         for(InvenPlanet p : potPlanets){
             p.applyGrav();
             p.updatePos();
-            p.constrainToPot(potCenter, potRadius, POT_OPENING_HALF_DEG);
+            p.constrainToPot(potCenter, potRadius, potTopDegree);
         }
-        for(int i = 0; i < potPlanets.size(); i++){
-            for(int j = i + 1; j < potPlanets.size(); j++){
-                InvenPlanet a = potPlanets.get(i);
-                InvenPlanet b = potPlanets.get(j);
-                if(a.checkColPlanet(b)){
-                    a.hitCirc(b);
+
+        for(int iter = 0; iter < iterations; iter++){
+            for(int i = 0; i < potPlanets.size(); i++){
+                for(int j = i + 1; j < potPlanets.size(); j++){
+                    InvenPlanet a = potPlanets.get(i);
+                    InvenPlanet b = potPlanets.get(j);
+                    if(a.checkColPlanet(b)){
+                        a.hitCirc(b);
+                    }
                 }
+            }
+            for(InvenPlanet p : potPlanets){
+                p.constrainToPot(potCenter, potRadius, potTopDegree);
             }
         }
 
         potPlanets.removeIf(p -> {
-            boolean lost = p.position.dst(potCenter) > potRadius + p.r + POT_LOSS_MARGIN;
+            boolean lost = p.position.dst(potCenter) > potRadius + p.r + lossMargin;
             if(lost && p == selectedInvenPlanet){
                 selectedInvenPlanet = null;
             }
@@ -271,8 +270,8 @@ public class Main extends ApplicationAdapter {
     }
 
     private void drawPot(ShapeRenderer sr){
-        float closedStart = 90f + POT_OPENING_HALF_DEG;
-        float closedDegrees = 360f - (POT_OPENING_HALF_DEG * 2f);
+        float closedStart = 90f + potTopDegree;
+        float closedDegrees = 360f - (potTopDegree * 2f);
 
         sr.setColor(new Color(0.35f, 0.22f, 0.12f, 1f));
         sr.arc(potCenter.x, potCenter.y, potRadius + 14, closedStart, closedDegrees);
@@ -334,7 +333,6 @@ public class Main extends ApplicationAdapter {
 
                     potPlanets.remove(selectedInvenPlanet);
                     selectedInvenPlanet = null;
-                    spawnPotPlanet();
 
                     inventoryDrag = true;
                 }
@@ -396,6 +394,10 @@ public class Main extends ApplicationAdapter {
                     }
                 }
 
+                if(Gdx.input.isKeyJustPressed(Input.Keys.P)){
+                    spawnPotPlanet();
+                }
+
                 player.updatePos();
                 coinSpawner.pickupCoins(player.getPosition());
 
@@ -406,6 +408,7 @@ public class Main extends ApplicationAdapter {
 
                 mouseForce.scl(mouseForce.len());
                 mouseForce.limit(10f);
+
 
                 if(mDown&&!player.getLaunched()&&ready){ // visualise strength
                     player.genTrail(planets,sr,mouseForce);

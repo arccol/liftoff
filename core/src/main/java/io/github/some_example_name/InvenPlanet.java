@@ -54,10 +54,6 @@ public class InvenPlanet {
         vel.scl(0.99f);
     }
 
-    public void draw(ShapeRenderer sr){
-        draw(sr, false);
-    }
-
     public void draw(ShapeRenderer sr, boolean selected){
         if(selected){
             sr.setColor(Color.GOLD);
