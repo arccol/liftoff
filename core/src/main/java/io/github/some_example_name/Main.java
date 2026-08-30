@@ -368,10 +368,12 @@ public class Main extends ApplicationAdapter {
                         continue;
                     }
                     planet.draw(sr);
+
+                    if(player.checkColPlanet(planet)) {
+                        player.moveCol(planet);
+                    }
+
                     if (player.getLaunched()) {
-                        if(player.checkColPlanet(planet)) {
-                            player.moveCol(planet);
-                        }
 
                         Vector2 planetDir = planet.getPosition().cpy()
                             .sub(player.getPosition());
