@@ -20,6 +20,7 @@ import java.util.Random;
 
 public class Main extends ApplicationAdapter {
     List<RealPlanet> planets;
+    List<Debris> debrisList;
     List<Coin> coinList;
     CoinSpawner coinSpawner;
     Player player;
@@ -59,11 +60,11 @@ public class Main extends ApplicationAdapter {
         rand = new Random();
         sr = new ShapeRenderer();
         planets = new ArrayList<>();
+        debrisList = new ArrayList<>();
         player = new Player(600,400,10);
         player.setLaunched(false);
         mousePos = new Vector2();
         staticMousePos = new Vector2();
-
         potPlanets = new ArrayList<>();
         potCenter = new Vector2(Gdx.graphics.getWidth() - 150, 130);
         potRadius = 100;
@@ -363,11 +364,17 @@ public class Main extends ApplicationAdapter {
             case GAME:
                 updatePot();
 
+                player.setDisToPlanet(9999);
+
                 for(RealPlanet planet : planets) {
                     if (planet == null) {
                         continue;
                     }
                     planet.draw(sr);
+
+                    if(player.getPosition().cpy().sub(planet.getPosition().cpy()).len()<player.getDisToPlanet()){
+                        player.setDisToPlanet(player.getPosition().cpy().sub(planet.getPosition().cpy()).len());
+                    }
 
                     if(player.checkColPlanet(planet)) {
                         player.moveCol(planet);
@@ -400,7 +407,53 @@ public class Main extends ApplicationAdapter {
                     spawnPotPlanet();
                 }
 
+                if(Gdx.input.isKeyJustPressed(Input.Keys.S)){
+                    debrisList.add(new Debris((int) mousePos.x, (int) mousePos.y, 8));
+                }
+
+                for(Debris d : debrisList){
+                    if(d.isHit()){
+                        for(RealPlanet planet : planets){
+                            if(planet == null) continue;
+
+                            if(d.checkColPlanet(planet)){
+                                d.moveCol(planet);
+                            }
+
+                            Vector2 planetDir = planet.getPosition().cpy()
+                                .sub(d.getPosition());
+
+                            float distance = planetDir.len();
+                            float gravityRadius = planet.getSize() * 100f;
+
+                            if(distance < gravityRadius && distance > 1) {
+                                planetDir.nor();
+
+                                float strength = (planet.getDens() * planet.getSize() * 20)
+                                    / (distance * distance);
+
+                                strength = Math.min(strength, 5f);
+                                strength *= Debris.GRAVITY_SCALE;
+
+                                d.applyForce(planetDir.scl(strength));
+                            }
+                        }
+                    }
+
+                    if(d.checkColPlayer(player)){
+                        d.resolveColPlayer(player);
+                    }
+
+                    d.updatePos();
+                    d.draw(sr);
+                }
+
                 player.updatePos();
+
+                if(player.getLaunched() && player.getLaunchAvailable()){
+                    player.setLaunchAvailable(true);
+                }
+
                 coinSpawner.pickupCoins(player.getPosition());
 
                 Vector2 mouseForce = mousePos.cpy()
@@ -411,8 +464,7 @@ public class Main extends ApplicationAdapter {
                 mouseForce.scl(mouseForce.len());
                 mouseForce.limit(10f);
 
-
-                if(mDown&&!player.getLaunched()&&ready){ // visualise strength
+                if(mDown&&(!player.getLaunched()||player.getLaunchAvailable())&&ready){
                     player.genTrail(planets,sr,mouseForce);
                     Vector2 ghostMouse = mousePos.cpy()
                         .sub(staticMousePos)
@@ -440,8 +492,9 @@ public class Main extends ApplicationAdapter {
                     sr.setColor(Color.WHITE);
                 }
 
-                if(!player.getLaunched()&&!mDown&&mWasDown&&bufferFrames>10){
+                if((!player.getLaunched()||player.getLaunchAvailable())&&!mDown&&mWasDown&&bufferFrames>10){
                     player.setLaunched(true);
+                    player.setLaunchAvailable(false);
                     player.applyForce(mouseForce);
                 }
 

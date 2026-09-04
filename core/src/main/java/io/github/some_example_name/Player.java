@@ -13,6 +13,8 @@ public class Player {
     int rad;
     Trajectory trail;
     boolean launched;
+    boolean launchAvailable;
+    float distanceToPlanet;
 
     public Player(int x, int y, int rad){
         position = new Vector2();
@@ -23,15 +25,12 @@ public class Player {
         this.rad = rad;
         accel.set(0,0);
         vel.set(0,0);
+        distanceToPlanet = 9999;
     }
 
     public void updatePos(){
-        prevpos.set(position);
+        prevpos.set(position.cpy());
         position.add(vel);
-    }
-
-    public boolean getStopped(){
-        return (prevpos.sub(position).len()<0.05f);
     }
 
     public void applyForce(Vector2 force) {
@@ -101,5 +100,21 @@ public class Player {
 
     public Vector2 getDis(){
         return prevpos.cpy().sub(position);
+    }
+
+    public boolean getLaunchAvailable() {
+        return (prevpos.cpy().sub(position).len()<1f&&distanceToPlanet<100);
+    }
+
+    public void setLaunchAvailable(boolean b) {
+        launchAvailable = b;
+    }
+
+    public void setDisToPlanet(float d){
+        distanceToPlanet = d;
+    }
+
+    public float getDisToPlanet(){
+        return distanceToPlanet;
     }
 }

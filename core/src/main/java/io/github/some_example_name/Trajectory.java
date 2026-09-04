@@ -53,6 +53,7 @@ public class Trajectory {
                     vel.add(planetDir.scl(strength));
                 }
             }
+
             pos.add(vel);
             markers[i].set(pos.cpy());
         }
