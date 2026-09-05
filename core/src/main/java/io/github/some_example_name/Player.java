@@ -1,6 +1,7 @@
 package io.github.some_example_name;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import java.util.List;
@@ -16,7 +17,7 @@ public class Player {
     boolean launchAvailable;
     float distanceToPlanet;
 
-    public Player(int x, int y, int rad){
+    public Player(int x, int y, int rad, Texture playerTexture){
         position = new Vector2();
         accel = new Vector2();
         vel = new Vector2();
@@ -29,8 +30,8 @@ public class Player {
     }
 
     public void updatePos(){
-        prevpos.set(position.cpy());
         position.add(vel);
+        prevpos.set(position.cpy());
     }
 
     public void applyForce(Vector2 force) {
@@ -103,7 +104,7 @@ public class Player {
     }
 
     public boolean getLaunchAvailable() {
-        return (prevpos.cpy().sub(position).len()<1f&&distanceToPlanet<100);
+        return (prevpos.cpy().sub(position).len()<1f&&distanceToPlanet<50);
     }
 
     public void setLaunchAvailable(boolean b) {

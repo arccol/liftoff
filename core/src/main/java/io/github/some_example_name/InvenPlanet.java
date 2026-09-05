@@ -1,29 +1,27 @@
 package io.github.some_example_name;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-
-import java.util.Vector;
 
 public class InvenPlanet {
     float x;
     float y;
-    int r;
+    int rad;
     int dens;
     Vector2 position = new Vector2();
     Vector2 vel = new Vector2();
     Vector2 grav = new Vector2();
+    Texture planetTexture;
 
-    public InvenPlanet(int x, int y, int r){
-        this(x, y, r, 1);
-    }
-
-    public InvenPlanet(int x, int y, int r, int dens){
+    public InvenPlanet(int x, int y, int r, int dens, Texture planetTexture){
         this.x = x;
         this.y = y;
-        this.r = r;
+        this.rad = r;
         this.dens = dens;
+        this.planetTexture = planetTexture;
         position.set(x,y);
         vel.set(0,0);
         grav.set(0,-0.1f);
@@ -34,7 +32,7 @@ public class InvenPlanet {
     }
 
     public int getSize(){
-        return r;
+        return rad;
     }
 
     public void applyGrav(){
@@ -42,7 +40,7 @@ public class InvenPlanet {
     }
 
     public boolean checkLost(){
-        if(position.y<-r){
+        if(position.y<-rad){
             return true;
         }else{
             return false;
@@ -54,14 +52,20 @@ public class InvenPlanet {
         vel.scl(0.99f);
     }
 
-    public void draw(ShapeRenderer sr, boolean selected){
+    public void draw(ShapeRenderer sr, boolean selected, SpriteBatch batch){
+
+        batch.begin();
+        batch.setColor(1f-(float) dens/5, 1f-(float) dens/5, 1f-(float) dens/5, 1f);
+        batch.draw(planetTexture,position.x- rad,position.y- rad, rad *2, rad *2);
+        batch.end();
+
         if(selected){
             sr.setColor(Color.GOLD);
-            sr.circle(position.x, position.y, r + 4);
+            sr.circle(position.x, position.y, rad + 4);
         }
         float shade = 1 - ((float) dens / 5);
         sr.setColor(new Color(shade, shade, shade, 1));
-        sr.circle(position.x,position.y,r);
+        sr.circle(position.x,position.y, rad);
         sr.setColor(Color.WHITE);
     }
 
@@ -70,7 +74,7 @@ public class InvenPlanet {
         targetPos = target.position;
         float difference;
         difference = position.dst(targetPos);
-        if(difference>r+target.r){
+        if(difference> rad +target.rad){
             return false;
         }else{
             return true;
@@ -86,7 +90,7 @@ public class InvenPlanet {
             dist = 0.0001f;
         }
 
-        float overlap = (r + target.r) - dist;
+        float overlap = (rad + target.rad) - dist;
 
         if (overlap > 0) {
             delta.nor();
@@ -110,7 +114,7 @@ public class InvenPlanet {
         Vector2 delta = new Vector2(position).sub(potCenter);
         float dist = delta.len();
 
-        if(dist + r <= potRadius){
+        if(dist + rad <= potRadius){
             return;
         }
 
@@ -128,8 +132,8 @@ public class InvenPlanet {
         delta.nor();
 
         position.set(
-            potCenter.x + delta.x * (potRadius - r),
-            potCenter.y + delta.y * (potRadius - r)
+            potCenter.x + delta.x * (potRadius - rad),
+            potCenter.y + delta.y * (potRadius - rad)
         );
 
         float outward = vel.dot(delta);
@@ -145,7 +149,7 @@ public class InvenPlanet {
         float dx = position.x-closestX;
         float dy = position.y-closestY;
 
-        return (dx*dx+dy*dy) < (r*r);
+        return (dx*dx+dy*dy) < (rad * rad);
     }
 
     public void hitBox(Box box) {
@@ -155,8 +159,8 @@ public class InvenPlanet {
         float dx = position.x - closestX;
         float dy = position.y - closestY;
 
-        float overlapX = r - Math.abs(dx);
-        float overlapY = r - Math.abs(dy);
+        float overlapX = rad - Math.abs(dx);
+        float overlapY = rad - Math.abs(dy);
 
         if (overlapX < overlapY) {
             if (dx > 0) {
@@ -179,7 +183,7 @@ public class InvenPlanet {
     public boolean overlap(float x, float y) {
         float dx = position.x - x;
         float dy = position.y - y;
-        return (dx * dx + dy * dy) <= (r * r);
+        return (dx * dx + dy * dy) <= (rad * rad);
     }
 
 }

@@ -1,5 +1,6 @@
 package io.github.some_example_name;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
@@ -63,6 +64,7 @@ public class Trajectory {
     public void dropmarkers(Vector2[] marks) {
         for(int i = 0; i < marks.length; i++) {
             if (2f / (i/300f + 1) > 0.3) {
+                sr.setColor(Color.WHITE);
                 sr.circle(marks[i].x, marks[i].y, 2f / (i / 300f + 1));
             }
         }

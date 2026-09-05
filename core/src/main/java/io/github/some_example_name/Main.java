@@ -5,6 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.*;
@@ -47,21 +49,31 @@ public class Main extends ApplicationAdapter {
     InvenPlanet selectedInvenPlanet;
     Vector2 potCenter;
     float potRadius;
-    private static final float potTopDegree = 35f;
-    private static final float lossMargin = 40f;
-    private static final int iterations = 100;
+    private float potTopDegree = 35f;
+    private float lossMargin = 40f;
+    private int iterations = 100;
+    private Perlin debrisNoise;
+    private Texture playerTexture;
+    private Texture planetTexture;
+    private Texture debrisTexture;
+    private Texture goalFlagTexture;
+    private SpriteBatch batch;
 
     private boolean inventoryDrag;
 
     @Override
     public void create() {
+        planetTexture = new Texture(Gdx.files.internal("planet.png"));
+        playerTexture = new Texture(Gdx.files.internal("ship.png"));
+        debrisTexture = new Texture(Gdx.files.internal("scrap.png"));
+        goalFlagTexture = new Texture(Gdx.files.internal("goalFlag.png"));
         coinList = new ArrayList<>();
         coinSpawner = new CoinSpawner(coinList);
         rand = new Random();
         sr = new ShapeRenderer();
         planets = new ArrayList<>();
         debrisList = new ArrayList<>();
-        player = new Player(600,400,10);
+        player = new Player(600,400,10, playerTexture);
         player.setLaunched(false);
         mousePos = new Vector2();
         staticMousePos = new Vector2();
@@ -70,9 +82,11 @@ public class Main extends ApplicationAdapter {
         potRadius = 100;
         stage = new Stage(new ScreenViewport());
         skin = new Skin(Gdx.files.internal("uiskin.json"));
+        debrisNoise = new Perlin();
         Gdx.input.setInputProcessor(stage);
         changeScreen(Screen.HOME);
         Gdx.graphics.setResizable(false);
+        batch = new SpriteBatch();
     }
 
     public void changeScreen(Screen screen){
@@ -201,7 +215,7 @@ public class Main extends ApplicationAdapter {
         bufferFrames = 0;
 
         TextButton back = new TextButton("Back", skin);
-        back.setPosition(0, 900);
+        back.setPosition(0, Gdx.graphics.getHeight() - 60);
         back.setSize(100, 60);
         back.addListener(new ClickListener() {
             @Override
@@ -218,7 +232,7 @@ public class Main extends ApplicationAdapter {
         selectedInvenPlanet = null;
 
         TextButton back = new TextButton("Back", skin);
-        back.setPosition(0, 900);
+        back.setPosition(0, Gdx.graphics.getHeight() - 60);
         back.setSize(100, 60);
         back.addListener(new ClickListener() {
             @Override
@@ -230,13 +244,12 @@ public class Main extends ApplicationAdapter {
         stage.addActor(back);
     }
 
-
     private void spawnPotPlanet(){
         int rr = rand.nextInt(20) + 20;
         int rd = rand.nextInt(4) + 1;
         float spawnX = potCenter.x-2+rd;
         float spawnY = potCenter.y + potRadius + 30;
-        potPlanets.add(new InvenPlanet((int) spawnX, (int) spawnY, rr, rd));
+        potPlanets.add(new InvenPlanet((int) spawnX, (int) spawnY, rr, rd, planetTexture));
     }
 
     private void updatePot(){
@@ -262,7 +275,7 @@ public class Main extends ApplicationAdapter {
         }
 
         potPlanets.removeIf(p -> {
-            boolean lost = p.position.dst(potCenter) > potRadius + p.r + lossMargin;
+            boolean lost = p.position.dst(potCenter) > potRadius + p.rad + lossMargin;
             if(lost && p == selectedInvenPlanet){
                 selectedInvenPlanet = null;
             }
@@ -280,7 +293,7 @@ public class Main extends ApplicationAdapter {
         sr.arc(potCenter.x, potCenter.y, potRadius, closedStart, closedDegrees);
 
         for(InvenPlanet p : potPlanets){
-            p.draw(sr, p == selectedInvenPlanet);
+            p.draw(sr, p == selectedInvenPlanet, batch);
         }
     }
 
@@ -296,6 +309,66 @@ public class Main extends ApplicationAdapter {
 
     private boolean isOverPot(Vector2 pos){
         return potCenter.dst(pos) <= potRadius + 14;
+    }
+
+    public void generateDebris(){
+        debrisNoise.createpermtable();
+
+        int screenWidth = Gdx.graphics.getWidth()-300;
+        int screenHeight = Gdx.graphics.getHeight();
+
+        int debrisSize = 8;
+        int gridStep = 5;
+        int octaves = 4;
+
+        float highThreshold = 0.7f;
+        float lowThreshold = 0.25f;
+
+        float maxAmplitude = 0f;
+        float amp = 1f;
+        for(int i = 0; i < octaves; i++){
+            maxAmplitude += amp;
+            amp *= 0.5f;
+        }
+
+        for(int x=gridStep; x<screenWidth-gridStep; x+=gridStep){
+            for(int y=gridStep; y<screenHeight-gridStep; y+=gridStep){
+
+                float noiseValue = debrisNoise.FBM(x, y, octaves) / maxAmplitude;
+
+                boolean qualifies = noiseValue > highThreshold || noiseValue < lowThreshold;
+                if(!qualifies) continue;
+
+                int jitterX = rand.nextInt(gridStep / 2) - gridStep / 4;
+                int jitterY = rand.nextInt(gridStep / 2) - gridStep / 4;
+                Vector2 candidate = new Vector2(x + jitterX, y + jitterY);
+
+                if(candidate.x < debrisSize || candidate.x > screenWidth - debrisSize) continue;
+                if(candidate.y < debrisSize || candidate.y > screenHeight - debrisSize) continue;
+
+
+                boolean overlapsPlanet = false;
+                for(RealPlanet planet : planets){
+                    if(planet == null) continue;
+                    if(candidate.dst(planet.getPosition()) < planet.getSize() + debrisSize + 20){
+                        overlapsPlanet = true;
+                        break;
+                    }
+                }
+                if(overlapsPlanet) continue;
+
+                boolean overlapsDebris = false;
+                for(Debris d : debrisList){
+                    if(candidate.dst(d.getPosition()) < (debrisSize + d.getSize()) * 1.6f){
+                        overlapsDebris = true;
+                        break;
+                    }
+                }
+                if(overlapsDebris) continue;
+
+                debrisList.add(new Debris((int) candidate.x, (int) candidate.y, debrisSize, debrisTexture));
+            }
+        }
     }
 
     @Override
@@ -322,13 +395,9 @@ public class Main extends ApplicationAdapter {
                     selectedInvenPlanet = (selectedInvenPlanet == clickedMarble) ? null : clickedMarble;
                     inventoryDrag = true;
                 } else if(isOverPot(mousePos)){
-
                     inventoryDrag = true;
                 } else if(selectedInvenPlanet != null){
-                    RealPlanet placed = new RealPlanet(
-                        (int) mousePos.x, (int) mousePos.y,
-                        selectedInvenPlanet.r, selectedInvenPlanet.dens, coinList
-                    );
+                    RealPlanet placed = new RealPlanet((int) mousePos.x, (int) mousePos.y, selectedInvenPlanet.rad, selectedInvenPlanet.dens, coinList, planetTexture);
                     placed.generateCoins();
                     planets.add(placed);
 
@@ -354,6 +423,10 @@ public class Main extends ApplicationAdapter {
             selectedInvenPlanet = null;
         }
 
+        if(Gdx.input.isKeyJustPressed(Input.Keys.D)){
+            generateDebris();
+        }
+
         if(leftJustPressed && !inventoryDrag){
             staticMousePos.set(mousePos.cpy());
         }
@@ -370,7 +443,7 @@ public class Main extends ApplicationAdapter {
                     if (planet == null) {
                         continue;
                     }
-                    planet.draw(sr);
+                    planet.draw(batch);
 
                     if(player.getPosition().cpy().sub(planet.getPosition().cpy()).len()<player.getDisToPlanet()){
                         player.setDisToPlanet(player.getPosition().cpy().sub(planet.getPosition().cpy()).len());
@@ -408,7 +481,7 @@ public class Main extends ApplicationAdapter {
                 }
 
                 if(Gdx.input.isKeyJustPressed(Input.Keys.S)){
-                    debrisList.add(new Debris((int) mousePos.x, (int) mousePos.y, 8));
+                    debrisList.add(new Debris((int) mousePos.x, (int) mousePos.y, 8, debrisTexture));
                 }
 
                 for(Debris d : debrisList){
@@ -433,7 +506,7 @@ public class Main extends ApplicationAdapter {
                                     / (distance * distance);
 
                                 strength = Math.min(strength, 5f);
-                                strength *= Debris.GRAVITY_SCALE;
+                                strength *= Debris.gravityScale;
 
                                 d.applyForce(planetDir.scl(strength));
                             }
@@ -499,7 +572,7 @@ public class Main extends ApplicationAdapter {
                 }
 
                 player.draw(sr);
-                coinSpawner.draw(sr);
+                coinSpawner.draw(sr, batch);
 
                 drawPot(sr);
         }

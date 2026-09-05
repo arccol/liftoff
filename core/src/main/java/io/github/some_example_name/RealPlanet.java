@@ -1,6 +1,8 @@
 package io.github.some_example_name;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
@@ -19,8 +21,9 @@ public class RealPlanet {
     Random rand;
     int offset = 30;
     List<Coin> coinList;
+    Texture planetTexture;
 
-    public RealPlanet(int x, int y, int rad, int dens, List<Coin> coinList){
+    public RealPlanet(int x, int y, int rad, int dens, List<Coin> coinList, Texture planetTexture){
         position = new Vector2(x,y);
         tempvec = new Vector2(x,y);
         this.rad = rad;
@@ -30,12 +33,14 @@ public class RealPlanet {
         rand = new Random();
         randomVec.set(0,0);
         this.coinList = coinList;
+        this.planetTexture = planetTexture;
     }
 
-    public void draw(ShapeRenderer sr){
-        sr.setColor(new Color(1-((float) dens /5),1-((float) dens /5),1-((float) dens /5),1)); // darker = denser
-        sr.circle(position.x, position.y,rad);
-        sr.setColor(Color.WHITE);
+    public void draw(SpriteBatch batch){
+        batch.begin();
+        batch.setColor(1f-(float) dens/5, 1f-(float) dens/5, 1f-(float) dens/5, 1f);
+        batch.draw(planetTexture,position.x-rad,position.y-rad, rad*2, rad*2);
+        batch.end();
     }
 
     public int getDens(){

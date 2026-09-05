@@ -1,6 +1,8 @@
 package io.github.some_example_name;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
@@ -15,7 +17,7 @@ public class CoinSpawner {
         totalcoins = 0;
     }
 
-    public void draw(ShapeRenderer sr){
+    public void draw(ShapeRenderer sr, Batch batch){
         sr.setColor(Color.GOLD);
         for(Coin coin : coinList){
             sr.circle(coin.getPos().x, coin.getPos().y, coin.getSize());

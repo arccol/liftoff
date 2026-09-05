@@ -1,11 +1,12 @@
 package io.github.some_example_name;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
 public class Debris {
-    public static final float GRAVITY_SCALE = 0.2f;
+    public static float gravityScale = 0.2f;
 
     Vector2 position;
     Vector2 prevpos;
@@ -13,7 +14,7 @@ public class Debris {
     int size;
     boolean hit;
 
-    public Debris(int x, int y, int size){
+    public Debris(int x, int y, int size, Texture debrisTexture){
         position = new Vector2(x, y);
         prevpos = new Vector2(x, y);
         vel = new Vector2();
