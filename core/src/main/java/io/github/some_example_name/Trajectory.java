@@ -23,7 +23,7 @@ public class Trajectory {
         this.planets = planets;
         this.mouseForce = mouseForce;
         this.rad = rad;
-        leng = 500000;
+        leng = 5000;
         markers = new Vector2[leng];
     }
 
