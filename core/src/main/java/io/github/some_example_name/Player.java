@@ -1,9 +1,14 @@
 package io.github.some_example_name;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+
+import javax.swing.*;
 import java.util.List;
 
 public class Player {
@@ -16,6 +21,9 @@ public class Player {
     boolean launched;
     boolean launchAvailable;
     float distanceToPlanet;
+    Texture playerTexture;
+    TextureRegion player;
+    Vector2 movementVector;
 
     public Player(int x, int y, int rad, Texture playerTexture){
         position = new Vector2();
@@ -23,14 +31,26 @@ public class Player {
         vel = new Vector2();
         position.set(x,y);
         prevpos = new Vector2();
+        movementVector = new Vector2();
+        movementVector.set(0,0);
         this.rad = rad;
+        this.playerTexture = playerTexture;
+        player = new TextureRegion();
+        player.setRegion(playerTexture);
         accel.set(0,0);
         vel.set(0,0);
         distanceToPlanet = 9999;
     }
 
+    public double getAngle(Vector2 vector){
+        double rads = Math.atan2(vector.y, vector.x);
+        double degs = Math.toDegrees(rads);
+        return degs;
+    }
+
     public void updatePos(){
         position.add(vel);
+        movementVector.set(position.cpy().sub(prevpos));
         prevpos.set(position.cpy());
     }
 
@@ -38,9 +58,13 @@ public class Player {
         vel.add(force);
     }
 
-    public void draw(ShapeRenderer sr){
+    public void draw(ShapeRenderer sr, SpriteBatch batch) {
         sr.setColor(Color.WHITE);
-        sr.circle(position.x, position.y,rad);
+        //sr.circle(position.x, position.y,rad);
+        batch.begin();
+        batch.setColor(Color.WHITE);
+        batch.draw(player,position.x-10,position.y-13, 11, 14, 22, 28, 1f, 1f, (float) getAngle(movementVector)-90f);
+        batch.end();
     }
 
     public Vector2 getPosition(){

@@ -571,7 +571,7 @@ public class Main extends ApplicationAdapter {
                     player.applyForce(mouseForce);
                 }
 
-                player.draw(sr);
+                player.draw(sr, batch);
                 coinSpawner.draw(sr, batch);
 
                 drawPot(sr);
