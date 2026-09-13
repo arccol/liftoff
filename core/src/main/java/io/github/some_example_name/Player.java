@@ -2,13 +2,14 @@ package io.github.some_example_name;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
-import javax.swing.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Player {
@@ -17,13 +18,14 @@ public class Player {
     Vector2 position;
     Vector2 prevpos;
     int rad;
-    Trajectory trail;
+    Trajectory traj;
     boolean launched;
     boolean launchAvailable;
     float distanceToPlanet;
     Texture playerTexture;
     TextureRegion player;
     Vector2 movementVector;
+    List<Vector2> trail;
 
     public Player(int x, int y, int rad, Texture playerTexture){
         position = new Vector2();
@@ -40,6 +42,7 @@ public class Player {
         accel.set(0,0);
         vel.set(0,0);
         distanceToPlanet = 9999;
+        trail = new ArrayList<>();
     }
 
     public double getAngle(Vector2 vector){
@@ -52,19 +55,36 @@ public class Player {
         position.add(vel);
         movementVector.set(position.cpy().sub(prevpos));
         prevpos.set(position.cpy());
+
+        trail.add(prevpos.cpy());
     }
 
     public void applyForce(Vector2 force) {
         vel.add(force);
     }
 
-    public void draw(ShapeRenderer sr, SpriteBatch batch) {
-        sr.setColor(Color.WHITE);
-        //sr.circle(position.x, position.y,rad);
+    public void draw(SpriteBatch batch) {
         batch.begin();
         batch.setColor(Color.WHITE);
         batch.draw(player,position.x-10,position.y-13, 11, 14, 22, 28, 1f, 1f, (float) getAngle(movementVector)-90f);
         batch.end();
+    }
+
+    public void drawTrail(ShapeRenderer sr){
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        sr.begin(ShapeRenderer.ShapeType.Filled);
+        sr.setColor(1f, 0.5f, 0f, 0.1f);
+
+        for (int i = 0; i < trail.size(); i++) {
+            if (trail.size() - 200 < i) {
+                sr.setColor(1f, 0.5f, 0f, 1f-(trail.size()-i)/100f);
+                sr.circle(trail.get(i).x, trail.get(i).y, 2);
+            }
+        }
+
+        sr.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
     public Vector2 getPosition(){
@@ -72,12 +92,12 @@ public class Player {
     }
 
     public void genTrail(List<RealPlanet> planets, ShapeRenderer sr, Vector2 mouseForce){
-        trail = new Trajectory(vel, position, planets, sr, mouseForce, rad);
-        trail.generate();
+        traj = new Trajectory(vel, position, planets, sr, mouseForce, rad);
+        traj.generate();
     }
 
-    public Trajectory getTrail(){
-        return trail;
+    public Trajectory getTraj(){
+        return traj;
     }
 
     public boolean checkColPlanet(RealPlanet target){

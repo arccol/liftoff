@@ -61,6 +61,7 @@ public class Main extends ApplicationAdapter {
     private Texture debrisTexture3;
     private Texture goalFlagTexture;
     private Texture backgroundTexture;
+    private Texture titlePageTexture;
     private Texture tutorialTexture;
     private SpriteBatch batch;
 
@@ -75,6 +76,7 @@ public class Main extends ApplicationAdapter {
         debrisTexture3 = new Texture(Gdx.files.internal("scrap3.png"));
         goalFlagTexture = new Texture(Gdx.files.internal("goalFlag.png"));
         backgroundTexture = new Texture(Gdx.files.internal("background.png"));
+        titlePageTexture = new Texture(Gdx.files.internal("liftoff.png"));
         tutorialTexture = new Texture(Gdx.files.internal("tutorial.png"));
 
         coinList = new ArrayList<>();
@@ -125,8 +127,8 @@ public class Main extends ApplicationAdapter {
         bufferFrames = 0;
 
         TextButton play = new TextButton("Play", skin);
-        play.setPosition(565,350);
-        play.setSize(150,80);
+        play.setPosition(810,196);
+        play.setSize(300,136);
         play.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -135,8 +137,8 @@ public class Main extends ApplicationAdapter {
         });
 
         TextButton settings = new TextButton("Settings", skin);
-        settings.setPosition(290, 350);
-        settings.setSize(150,80);
+        settings.setPosition(300, 196);
+        settings.setSize(300,136);
         settings.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -145,8 +147,8 @@ public class Main extends ApplicationAdapter {
         });
 
         TextButton tutorial = new TextButton("Tutorial", skin);
-        tutorial.setPosition(840, 350);
-        tutorial.setSize(150,80);
+        tutorial.setPosition(1320, 196);
+        tutorial.setSize(300,136);
         tutorial.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -293,6 +295,7 @@ public class Main extends ApplicationAdapter {
     }
 
     private void drawPot(ShapeRenderer sr){
+        sr.begin(ShapeRenderer.ShapeType.Filled);
         float closedStart = 90f + potTopDegree;
         float closedDegrees = 360f - (potTopDegree * 2f);
 
@@ -301,6 +304,7 @@ public class Main extends ApplicationAdapter {
         for(InvenPlanet p : potPlanets){
             p.draw(sr, p == selectedInvenPlanet, batch);
         }
+        sr.end();
     }
 
     private void drawRingSegment(ShapeRenderer sr, float centerX, float centerY, float innerRadius, float outerRadius, float startAngleDeg, float arcDegrees, Color color) {
@@ -602,15 +606,22 @@ public class Main extends ApplicationAdapter {
                     player.applyForce(mouseForce);
                 }
 
-                player.draw(sr, batch);
-                coinSpawner.draw(sr, batch);
-
+                coinSpawner.draw(sr);
+                sr.end();
+                player.drawTrail(sr);
+                player.draw(batch);
                 drawPot(sr);
                 break;
             case TUTORIAL:
                 batch.begin();
                 batch.setColor(Color.WHITE);
                 batch.draw(tutorialTexture,0,0);
+                batch.end();
+                break;
+            case HOME:
+                batch.begin();
+                batch.setColor(Color.WHITE);
+                batch.draw(titlePageTexture,0,0);
                 batch.end();
                 break;
         }
