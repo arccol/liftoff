@@ -35,7 +35,7 @@ public class Main extends ApplicationAdapter {
         HOME,
         SETTINGS,
         GAME,
-        CUSTOMISE
+        TUTORIAL
     }
     private Screen currentScreen;
     private boolean mDown;
@@ -56,9 +56,12 @@ public class Main extends ApplicationAdapter {
     private Perlin debrisNoise;
     private Texture playerTexture;
     private Texture planetTexture;
-    private Texture debrisTexture;
+    private Texture debrisTexture1;
+    private Texture debrisTexture2;
+    private Texture debrisTexture3;
     private Texture goalFlagTexture;
     private Texture backgroundTexture;
+    private Texture tutorialTexture;
     private SpriteBatch batch;
 
     private boolean inventoryDrag;
@@ -67,9 +70,13 @@ public class Main extends ApplicationAdapter {
     public void create() {
         planetTexture = new Texture(Gdx.files.internal("planet.png"));
         playerTexture = new Texture(Gdx.files.internal("ship.png"));
-        debrisTexture = new Texture(Gdx.files.internal("scrap.png"));
+        debrisTexture1 = new Texture(Gdx.files.internal("scrap1.png"));
+        debrisTexture2 = new Texture(Gdx.files.internal("scrap2.png"));
+        debrisTexture3 = new Texture(Gdx.files.internal("scrap3.png"));
         goalFlagTexture = new Texture(Gdx.files.internal("goalFlag.png"));
         backgroundTexture = new Texture(Gdx.files.internal("background.png"));
+        tutorialTexture = new Texture(Gdx.files.internal("tutorial.png"));
+
         coinList = new ArrayList<>();
         coinSpawner = new CoinSpawner(coinList);
         rand = new Random();
@@ -108,8 +115,8 @@ public class Main extends ApplicationAdapter {
             case GAME:
                 createGameScreen();
                 break;
-            case CUSTOMISE:
-                createCustomiseScreen();
+            case TUTORIAL:
+                createTutorialScreen();
                 break;
         }
     }
@@ -137,19 +144,19 @@ public class Main extends ApplicationAdapter {
             }
         });
 
-        TextButton customise = new TextButton("Customise", skin);
-        customise.setPosition(840, 350);
-        customise.setSize(150,80);
-        customise.addListener(new ClickListener() {
+        TextButton tutorial = new TextButton("Tutorial", skin);
+        tutorial.setPosition(840, 350);
+        tutorial.setSize(150,80);
+        tutorial.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                changeScreen(Screen.CUSTOMISE);
+                changeScreen(Screen.TUTORIAL);
             }
         });
 
         stage.addActor(play);
         stage.addActor(settings);
-        stage.addActor(customise);
+        stage.addActor(tutorial);
     }
 
     private void createSettingsScreen(){
@@ -214,9 +221,8 @@ public class Main extends ApplicationAdapter {
         stage.addActor(back);
     }
 
-    private void createCustomiseScreen(){
+    private void createTutorialScreen(){
         bufferFrames = 0;
-
         TextButton back = new TextButton("Back", skin);
         back.setPosition(0, Gdx.graphics.getHeight() - 60);
         back.setSize(100, 60);
@@ -391,7 +397,7 @@ public class Main extends ApplicationAdapter {
                 }
                 if(overlapsDebris) continue;
 
-                debrisList.add(new Debris((int) candidate.x, (int) candidate.y, debrisSize, debrisTexture));
+                debrisList.add(new Debris((int) candidate.x, (int) candidate.y, debrisSize, debrisTexture1, debrisTexture2, debrisTexture3));
             }
         }
     }
@@ -511,21 +517,16 @@ public class Main extends ApplicationAdapter {
                     spawnPotPlanet();
                 }
 
-                if(Gdx.input.isKeyJustPressed(Input.Keys.S)){
-                    debrisList.add(new Debris((int) mousePos.x, (int) mousePos.y, 8, debrisTexture));
-                }
-
                 for(Debris d : debrisList){
                     if(d.isHit()){
                         for(RealPlanet planet : planets){
                             if(planet == null) continue;
 
                             if(d.checkColPlanet(planet)){
-                                d.moveCol(planet);
+                                d.delete();
                             }
 
-                            Vector2 planetDir = planet.getPosition().cpy()
-                                .sub(d.getPosition());
+                            Vector2 planetDir = planet.getPosition().cpy().sub(d.getPosition());
 
                             float distance = planetDir.len();
                             float gravityRadius = planet.getSize() * 100f;
@@ -533,8 +534,7 @@ public class Main extends ApplicationAdapter {
                             if(distance < gravityRadius && distance > 1) {
                                 planetDir.nor();
 
-                                float strength = (planet.getDens() * planet.getSize() * 20)
-                                    / (distance * distance);
+                                float strength = (planet.getDens() * planet.getSize() * 20) / (distance * distance);
 
                                 strength = Math.min(strength, 5f);
                                 strength *= Debris.gravityScale;
@@ -606,6 +606,13 @@ public class Main extends ApplicationAdapter {
                 coinSpawner.draw(sr, batch);
 
                 drawPot(sr);
+                break;
+            case TUTORIAL:
+                batch.begin();
+                batch.setColor(Color.WHITE);
+                batch.draw(tutorialTexture,0,0);
+                batch.end();
+                break;
         }
         sr.end();
         mWasDown = mDown;

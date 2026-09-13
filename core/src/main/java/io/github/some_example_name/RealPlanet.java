@@ -14,7 +14,6 @@ public class RealPlanet {
     int rad;
     int dens;
     Vector2 tempvec;
-    boolean placed;
     CoinSpawner coinSpawner;
     boolean overlap;
     Vector2 randomVec;

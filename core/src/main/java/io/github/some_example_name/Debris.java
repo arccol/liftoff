@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.Random;
@@ -17,22 +16,33 @@ public class Debris {
     Vector2 vel;
     int size;
     boolean hit;
-    Texture debrisTexture;
     TextureRegion debris;
     Random rand;
     int rot;
+    int type;
+    boolean hidden;
 
-    public Debris(int x, int y, int size, Texture debrisTexture){
+    public Debris(int x, int y, int size, Texture debrisTexture1, Texture debrisTexture2, Texture debrisTexture3){
         position = new Vector2(x, y);
         prevpos = new Vector2(x, y);
         vel = new Vector2();
         this.size = size;
         hit = false;
-        this.debrisTexture = debrisTexture;
         rand = new Random();
         debris = new TextureRegion();
-        debris.setRegion(debrisTexture);
         rot = rand.nextInt(1,360);
+        type = rand.nextInt(0,3)+1;
+        switch(type){
+            case 1:
+                debris.setRegion(debrisTexture1);
+                break;
+            case 2:
+                debris.setRegion(debrisTexture2);
+                break;
+            case 3:
+                debris.setRegion(debrisTexture3);
+                break;
+        }
     }
 
     public void updatePos(){
@@ -48,7 +58,19 @@ public class Debris {
     public void draw(SpriteBatch batch){
         batch.begin();
         batch.setColor(Color.WHITE);
-        batch.draw(debris, position.x-size,position.y-size,12f,11f,24f,21f,1f,1f,rot);
+        if(!hidden) {
+            switch (type) {
+                case 1:
+                    batch.draw(debris, position.x - size, position.y - size, 12f, 11f, 24f, 21f, 1f, 1f, rot);
+                    break;
+                case 2:
+                    batch.draw(debris, position.x - size, position.y - size, 12f, 12f, 24f, 24f, 1f, 1f, rot);
+                    break;
+                case 3:
+                    batch.draw(debris, position.x - size, position.y - size, 12f, 11f, 24f, 22f, 1f, 1f, rot);
+                    break;
+            }
+        }
         batch.end();
     }
 
@@ -70,6 +92,9 @@ public class Debris {
     }
 
     public boolean checkColPlayer(Player player){
+        if(hidden){
+            return false;
+        }
         float difference = position.dst(player.getPosition());
         return !(difference > boundingRadius() + player.rad);
     }
@@ -108,21 +133,7 @@ public class Debris {
         return !(difference > boundingRadius() + target.rad);
     }
 
-    public void moveCol(RealPlanet target){
-        Vector2 delta = new Vector2(position).sub(target.position);
-        float dist = delta.len();
-        if(dist == 0) return;
-
-        float overlap = (boundingRadius() + target.rad) - dist;
-
-        if(overlap > 0){
-            delta.nor();
-            position.add(delta.cpy().scl(overlap));
-
-            float velocityIntoSurface = vel.dot(delta);
-            if(velocityIntoSurface < 0){
-                vel.sub(delta.cpy().scl(velocityIntoSurface * 1.6f));
-            }
-        }
+    public void delete(){
+        hidden = true;
     }
 }
