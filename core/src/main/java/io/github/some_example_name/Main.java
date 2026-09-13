@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -57,6 +58,7 @@ public class Main extends ApplicationAdapter {
     private Texture planetTexture;
     private Texture debrisTexture;
     private Texture goalFlagTexture;
+    private Texture backgroundTexture;
     private SpriteBatch batch;
 
     private boolean inventoryDrag;
@@ -67,6 +69,7 @@ public class Main extends ApplicationAdapter {
         playerTexture = new Texture(Gdx.files.internal("ship.png"));
         debrisTexture = new Texture(Gdx.files.internal("scrap.png"));
         goalFlagTexture = new Texture(Gdx.files.internal("goalFlag.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("background.png"));
         coinList = new ArrayList<>();
         coinSpawner = new CoinSpawner(coinList);
         rand = new Random();
@@ -287,13 +290,35 @@ public class Main extends ApplicationAdapter {
         float closedStart = 90f + potTopDegree;
         float closedDegrees = 360f - (potTopDegree * 2f);
 
-        sr.setColor(new Color(0.35f, 0.22f, 0.12f, 1f));
-        sr.arc(potCenter.x, potCenter.y, potRadius + 14, closedStart, closedDegrees);
-        sr.setColor(new Color(0.15f, 0.15f, 0.2f, 1f));
-        sr.arc(potCenter.x, potCenter.y, potRadius, closedStart, closedDegrees);
+        drawRingSegment(sr, potCenter.x, potCenter.y, potRadius, potRadius + 14, closedStart, closedDegrees, new Color(0.35f, 0.22f, 0.12f, 1f));
 
         for(InvenPlanet p : potPlanets){
             p.draw(sr, p == selectedInvenPlanet, batch);
+        }
+    }
+
+    private void drawRingSegment(ShapeRenderer sr, float centerX, float centerY, float innerRadius, float outerRadius, float startAngleDeg, float arcDegrees, Color color) {
+        sr.setColor(color);
+
+        int segments = Math.max(6, (int)(12 * (float)Math.cbrt(outerRadius) * (arcDegrees / 360f)));
+        float step = arcDegrees / segments;
+
+        for (int i = 0; i < segments; i++) {
+            float a0 = (startAngleDeg + i * step) * MathUtils.degreesToRadians;
+            float a1 = (startAngleDeg + (i + 1) * step) * MathUtils.degreesToRadians;
+
+            float ix0 = centerX + innerRadius * MathUtils.cos(a0);
+            float iy0 = centerY + innerRadius * MathUtils.sin(a0);
+            float ox0 = centerX + outerRadius * MathUtils.cos(a0);
+            float oy0 = centerY + outerRadius * MathUtils.sin(a0);
+
+            float ix1 = centerX + innerRadius * MathUtils.cos(a1);
+            float iy1 = centerY + innerRadius * MathUtils.sin(a1);
+            float ox1 = centerX + outerRadius * MathUtils.cos(a1);
+            float oy1 = centerY + outerRadius * MathUtils.sin(a1);
+
+            sr.triangle(ix0, iy0, ox0, oy0, ix1, iy1);
+            sr.triangle(ox0, oy0, ox1, oy1, ix1, iy1);
         }
     }
 
@@ -376,6 +401,12 @@ public class Main extends ApplicationAdapter {
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
         float delta = Gdx.graphics.getDeltaTime();
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        batch.begin();
+        batch.setColor(Color.WHITE);
+        batch.draw(backgroundTexture,0,0);
+        batch.end();
+
         stage.act(delta);
         stage.draw();
 
@@ -518,7 +549,7 @@ public class Main extends ApplicationAdapter {
                     }
 
                     d.updatePos();
-                    d.draw(sr);
+                    d.draw(batch);
                 }
 
                 player.updatePos();

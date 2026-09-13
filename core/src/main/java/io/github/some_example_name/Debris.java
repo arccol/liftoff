@@ -2,8 +2,12 @@ package io.github.some_example_name;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+
+import java.util.Random;
 
 public class Debris {
     public static float gravityScale = 0.2f;
@@ -13,6 +17,10 @@ public class Debris {
     Vector2 vel;
     int size;
     boolean hit;
+    Texture debrisTexture;
+    TextureRegion debris;
+    Random rand;
+    int rot;
 
     public Debris(int x, int y, int size, Texture debrisTexture){
         position = new Vector2(x, y);
@@ -20,6 +28,11 @@ public class Debris {
         vel = new Vector2();
         this.size = size;
         hit = false;
+        this.debrisTexture = debrisTexture;
+        rand = new Random();
+        debris = new TextureRegion();
+        debris.setRegion(debrisTexture);
+        rot = rand.nextInt(1,360);
     }
 
     public void updatePos(){
@@ -32,10 +45,11 @@ public class Debris {
         vel.add(force);
     }
 
-    public void draw(ShapeRenderer sr){
-        sr.setColor(Color.GRAY);
-        sr.rect(position.x - size, position.y - size, size * 2, size * 2);
-        sr.setColor(Color.WHITE);
+    public void draw(SpriteBatch batch){
+        batch.begin();
+        batch.setColor(Color.WHITE);
+        batch.draw(debris, position.x-size,position.y-size,12f,11f,24f,21f,1f,1f,rot);
+        batch.end();
     }
 
     public Vector2 getPosition(){
