@@ -70,7 +70,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void create() {
         planetTexture = new Texture(Gdx.files.internal("planet.png"));
-        playerTexture = new Texture(Gdx.files.internal("ship.png"));
+        playerTexture = new Texture(Gdx.files.internal("plane.png"));
         debrisTexture1 = new Texture(Gdx.files.internal("scrap1.png"));
         debrisTexture2 = new Texture(Gdx.files.internal("scrap2.png"));
         debrisTexture3 = new Texture(Gdx.files.internal("scrap3.png"));

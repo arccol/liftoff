@@ -61,13 +61,13 @@ public class Debris {
         if(!hidden) {
             switch (type) {
                 case 1:
-                    batch.draw(debris, position.x - size, position.y - size, 12f, 11f, 24f, 21f, 1f, 1f, rot);
+                    batch.draw(debris, position.x - size-190, position.y - size-165, 200f, 175f, 400f, 350f, 0.06f, 0.06f, rot);
                     break;
                 case 2:
-                    batch.draw(debris, position.x - size, position.y - size, 12f, 12f, 24f, 24f, 1f, 1f, rot);
+                    batch.draw(debris, position.x - size-390, position.y - size-390, 400f, 400f, 800f, 800f, 0.05f, 0.05f, rot);
                     break;
                 case 3:
-                    batch.draw(debris, position.x - size, position.y - size, 12f, 11f, 24f, 22f, 1f, 1f, rot);
+                    batch.draw(debris, position.x - size-240, position.y - size-215, 250f, 225f, 500f, 450f, 0.06f, 0.06f, rot);
                     break;
             }
         }

@@ -66,7 +66,7 @@ public class Player {
     public void draw(SpriteBatch batch) {
         batch.begin();
         batch.setColor(Color.WHITE);
-        batch.draw(player,position.x-10,position.y-13, 11, 14, 22, 28, 1f, 1f, (float) getAngle(movementVector)-90f);
+        batch.draw(player,position.x-200,position.y-400, 200, 400, 400, 800, 0.05f, 0.05f, (float) getAngle(movementVector)-90f);
         batch.end();
     }
 
@@ -78,7 +78,7 @@ public class Player {
 
         for (int i = 0; i < trail.size(); i++) {
             if (trail.size() - 200 < i) {
-                sr.setColor(1f, 0.5f, 0f, 1f-(trail.size()-i)/100f);
+                sr.setColor(0.5f, 0.5f, 1f, 1f-(trail.size()-i)/100f);
                 sr.circle(trail.get(i).x, trail.get(i).y, 2);
             }
         }

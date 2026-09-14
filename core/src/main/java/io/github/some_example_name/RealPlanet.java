@@ -37,8 +37,8 @@ public class RealPlanet {
 
     public void draw(SpriteBatch batch){
         batch.begin();
-        batch.setColor(1f-(float) dens/5, 1f-(float) dens/5, 1f-(float) dens/5, 1f);
-        batch.draw(planetTexture,position.x-rad,position.y-rad, rad*2, rad*2);
+        batch.setColor(1f-(float) dens/10, 1f-(float) dens/10, 1f-(float) dens/10, 1f);
+        batch.draw(planetTexture,position.x-rad-5,position.y-rad-5, rad*2+10, rad*2+10);
         batch.end();
     }
 

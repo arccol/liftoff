@@ -64,7 +64,7 @@ public class Trajectory {
     public void dropmarkers(Vector2[] marks) {
         for(int i = 0; i < marks.length; i++) {
             if (2f / (i/300f + 1) > 0.3) {
-                sr.setColor(Color.WHITE);
+                sr.setColor(Color.BLUE);
                 sr.circle(marks[i].x, marks[i].y, 2f / (i / 300f + 1));
             }
         }
