@@ -46,7 +46,7 @@ public class Trajectory {
 
                 if(distance < gravityRadius && distance > 1) {
                     planetDir.nor();
-                    float strength = (planet.getDens() * planet.getSize() * 20)
+                    float strength = (planet.getDens() * planet.getSize() * 15)
                         / (distance * distance);
 
                     strength = Math.min(strength, 5f);

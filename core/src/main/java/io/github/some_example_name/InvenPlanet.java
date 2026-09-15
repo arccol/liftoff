@@ -1,6 +1,8 @@
 package io.github.some_example_name;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -55,18 +57,22 @@ public class InvenPlanet {
     public void draw(ShapeRenderer sr, boolean selected, SpriteBatch batch){
 
         batch.begin();
-        batch.setColor(1f-(float) dens/5, 1f-(float) dens/5, 1f-(float) dens/5, 1f);
+        batch.setColor(1f-(float) dens/10, 1f-(float) dens/10, 1f-(float) dens/10, 1f);
         batch.draw(planetTexture,position.x- rad,position.y- rad, rad *2, rad *2);
         batch.end();
 
+
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
         if(selected){
-            sr.setColor(Color.GOLD);
+            sr.setColor(new Color(1f,0.6f,0.1f,0.3f));
             sr.circle(position.x, position.y, rad + 4);
         }
-        float shade = 1 - ((float) dens / 5);
-        sr.setColor(new Color(shade, shade, shade, 1));
-        sr.circle(position.x,position.y, rad);
-        sr.setColor(Color.WHITE);
+        //float shade = 1 - ((float) dens / 5);
+        //sr.setColor(new Color(shade, shade, shade, 1));
+        //sr.circle(position.x,position.y, rad);
+        //sr.setColor(Color.WHITE);
     }
 
     public boolean checkColPlanet(InvenPlanet target){
