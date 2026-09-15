@@ -55,12 +55,10 @@ public class InvenPlanet {
     }
 
     public void draw(ShapeRenderer sr, boolean selected, SpriteBatch batch){
-
         batch.begin();
         batch.setColor(1f-(float) dens/10, 1f-(float) dens/10, 1f-(float) dens/10, 1f);
         batch.draw(planetTexture,position.x- rad,position.y- rad, rad *2, rad *2);
         batch.end();
-
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -69,10 +67,6 @@ public class InvenPlanet {
             sr.setColor(new Color(1f,0.6f,0.1f,0.3f));
             sr.circle(position.x, position.y, rad + 4);
         }
-        //float shade = 1 - ((float) dens / 5);
-        //sr.setColor(new Color(shade, shade, shade, 1));
-        //sr.circle(position.x,position.y, rad);
-        //sr.setColor(Color.WHITE);
     }
 
     public boolean checkColPlanet(InvenPlanet target){
@@ -126,7 +120,6 @@ public class InvenPlanet {
 
         if(dist < 0.0001f){
             delta.set(0,1);
-            dist = 0.0001f;
         }
 
         float angleDeg = (float) Math.toDegrees(Math.atan2(delta.y, delta.x));
@@ -145,44 +138,6 @@ public class InvenPlanet {
         float outward = vel.dot(delta);
         if(outward > 0){
             vel.sub(delta.cpy().scl(outward));
-        }
-    }
-
-    public boolean checkColBox(Box box) {
-        float closestX = Math.max(box.x, Math.min(position.x,box.x+box.w));
-        float closestY = Math.max(box.y, Math.min(position.y,box.y+box.h));
-
-        float dx = position.x-closestX;
-        float dy = position.y-closestY;
-
-        return (dx*dx+dy*dy) < (rad * rad);
-    }
-
-    public void hitBox(Box box) {
-        float closestX = Math.max(box.x, Math.min(position.x, box.x + box.w));
-        float closestY = Math.max(box.y, Math.min(position.y, box.y + box.h));
-
-        float dx = position.x - closestX;
-        float dy = position.y - closestY;
-
-        float overlapX = rad - Math.abs(dx);
-        float overlapY = rad - Math.abs(dy);
-
-        if (overlapX < overlapY) {
-            if (dx > 0) {
-                position.x += overlapX;
-            } else {
-                position.x -= overlapX;
-            }
-            vel.x = 0;
-
-        } else {
-            if (dy > 0) {
-                position.y += overlapY;
-            } else {
-                position.y -= overlapY;
-            }
-            vel.y = 0;
         }
     }
 
