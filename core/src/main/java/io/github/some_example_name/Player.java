@@ -26,6 +26,7 @@ public class Player {
     TextureRegion player;
     Vector2 movementVector;
     List<Vector2> trail;
+    boolean win;
 
     public Player(int x, int y, int rad, Texture playerTexture){
         position = new Vector2();
@@ -42,6 +43,7 @@ public class Player {
         accel.set(0,0);
         vel.set(0,0);
         distanceToPlanet = 9999;
+        win = false;
         trail = new ArrayList<>();
     }
 
@@ -129,6 +131,11 @@ public class Player {
             vel.scl(0.9f);
             vel.add(delta.cpy().scl(0.1f));
         }
+
+        if(target.finish){
+            win = true;
+        }
+
     }
 
     public boolean getLaunched(){
@@ -153,6 +160,14 @@ public class Player {
 
     public void setLaunchAvailable(boolean b) {
         launchAvailable = b;
+    }
+
+    public boolean getWin(){
+        return win;
+    }
+
+    public void setWin(boolean win){
+        this.win = win;
     }
 
     public void setDisToPlanet(float d){

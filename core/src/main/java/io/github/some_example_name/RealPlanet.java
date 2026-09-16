@@ -21,8 +21,10 @@ public class RealPlanet {
     int offset = 30;
     List<Coin> coinList;
     Texture planetTexture;
+    boolean finish;
+    Texture goalFlagTexture;
 
-    public RealPlanet(int x, int y, int rad, int dens, List<Coin> coinList, Texture planetTexture){
+    public RealPlanet(int x, int y, int rad, int dens, List<Coin> coinList, Texture planetTexture, boolean finish, Texture goalFlagTexture){
         position = new Vector2(x,y);
         tempvec = new Vector2(x,y);
         this.rad = rad;
@@ -33,12 +35,17 @@ public class RealPlanet {
         randomVec.set(0,0);
         this.coinList = coinList;
         this.planetTexture = planetTexture;
+        this.finish = finish;
+        this.goalFlagTexture = goalFlagTexture;
     }
 
     public void draw(SpriteBatch batch){
         batch.begin();
         batch.setColor(1f-(float) dens/10, 1f-(float) dens/10, 1f-(float) dens/10, 1f);
         batch.draw(planetTexture,position.x-rad-5,position.y-rad-5, rad*2+10, rad*2+10);
+        if(finish){
+            batch.draw(goalFlagTexture, position.x-5,position.y+rad-5, 25f, 50f);
+        }
         batch.end();
     }
 

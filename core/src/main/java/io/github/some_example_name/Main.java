@@ -438,7 +438,7 @@ public class Main extends ApplicationAdapter {
                 } else if(isOverPot(mousePos)){
                     inventoryDrag = true;
                 } else if(selectedInvenPlanet != null){
-                    RealPlanet placed = new RealPlanet((int) mousePos.x, (int) mousePos.y, selectedInvenPlanet.rad, selectedInvenPlanet.dens, coinList, planetTexture);
+                    RealPlanet placed = new RealPlanet((int) mousePos.x, (int) mousePos.y, selectedInvenPlanet.rad, selectedInvenPlanet.dens, coinList, planetTexture, false, goalFlagTexture);
                     placed.generateCoins();
                     planets.add(placed);
 
@@ -466,6 +466,10 @@ public class Main extends ApplicationAdapter {
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.D)){
             generateDebris();
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
+            planets.add(new RealPlanet((int) mousePos.x, (int) mousePos.y,20,1, coinList, planetTexture, true, goalFlagTexture));
         }
 
         if(leftJustPressed && !inventoryDrag){
@@ -515,6 +519,13 @@ public class Main extends ApplicationAdapter {
                             );
                         }
                     }
+                }
+
+                if(player.getWin()){
+                    player.setWin(false);
+
+                    // advance level
+
                 }
 
                 if(Gdx.input.isKeyJustPressed(Input.Keys.P)){
