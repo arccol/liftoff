@@ -15,15 +15,17 @@ public class Trajectory {
     Vector2 mouseForce;
     int leng;
     int rad;
+    Vector2 wind;
 
-    public Trajectory(Vector2 vel, Vector2 pos, List<RealPlanet> planets, ShapeRenderer sr, Vector2 mouseForce, int rad) {
+    public Trajectory(Vector2 vel, Vector2 pos, List<RealPlanet> planets, ShapeRenderer sr, Vector2 mouseForce, int rad, Vector2 wind) {
         this.vel = vel.cpy();
         this.pos = pos.cpy();
         this.sr = sr;
         this.planets = planets;
         this.mouseForce = mouseForce;
         this.rad = rad;
-        leng = 5000;
+        this.wind = wind;
+        leng = 2500;
         markers = new Vector2[leng];
     }
 
@@ -54,7 +56,7 @@ public class Trajectory {
                     vel.add(planetDir.scl(strength));
                 }
             }
-
+            vel.add(wind);
             pos.add(vel);
             markers[i].set(pos.cpy());
         }

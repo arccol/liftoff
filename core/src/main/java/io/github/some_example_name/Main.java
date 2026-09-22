@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.Random;
 
 public class Main extends ApplicationAdapter {
-    List<RealPlanet> planets;
-    List<Debris> debrisList;
-    List<Coin> coinList;
-    CoinSpawner coinSpawner;
-    Player player;
-    ShapeRenderer sr;
-    Vector2 mousePos;
+    private List<RealPlanet> planets;
+    private List<Debris> debrisList;
+    private List<Coin> coinList;
+    private CoinSpawner coinSpawner;
+    private Player player;
+    private ShapeRenderer sr;
+    private Vector2 mousePos;
     private Stage stage;
     private Skin skin;
     enum Screen{
@@ -45,11 +45,11 @@ public class Main extends ApplicationAdapter {
     private Vector2 staticMousePos;
     private int targetFps = 60;
     private float volume = 1.0f;
-    Random rand;
-    List<InvenPlanet> potPlanets;
-    InvenPlanet selectedInvenPlanet;
-    Vector2 potCenter;
-    float potRadius;
+    private Random rand;
+    private List<InvenPlanet> potPlanets;
+    private InvenPlanet selectedInvenPlanet;
+    private Vector2 potCenter;
+    private float potRadius;
     private float potTopDegree = 35f;
     private float lossMargin = 40f;
     private int iterations = 100;
@@ -64,6 +64,8 @@ public class Main extends ApplicationAdapter {
     private Texture titlePageTexture;
     private Texture tutorialTexture;
     private SpriteBatch batch;
+    private Vector2 wind;
+    private List<WindParticle> windParticles;
 
     private boolean inventoryDrag;
 
@@ -78,11 +80,20 @@ public class Main extends ApplicationAdapter {
         backgroundTexture = new Texture(Gdx.files.internal("background.png"));
         titlePageTexture = new Texture(Gdx.files.internal("liftoff.png"));
         tutorialTexture = new Texture(Gdx.files.internal("tutorial.png"));
-
+        wind = new Vector2();
+        wind.set(0,0);
         coinList = new ArrayList<>();
         coinSpawner = new CoinSpawner(coinList);
         rand = new Random();
         sr = new ShapeRenderer();
+        windParticles = new ArrayList<>();
+        for(int x=0;x<Gdx.graphics.getWidth();x++){
+            for(int y=0;y<Gdx.graphics.getHeight();y++) {
+                if (x % 100 == 0 && y % 100 == 0 && rand.nextInt(1,5)==4) {
+                    windParticles.add(new WindParticle(x+rand.nextInt(1,50), y+rand.nextInt(1,50), 5));
+                }
+            }
+        }
         planets = new ArrayList<>();
         debrisList = new ArrayList<>();
         player = new Player(600,400,10, playerTexture);
@@ -567,6 +578,20 @@ public class Main extends ApplicationAdapter {
                     d.draw(batch);
                 }
 
+                if(Gdx.input.isKeyJustPressed(Input.Keys.W)){
+                    wind.set(rand.nextFloat(-0.01f,0.01f),rand.nextFloat(-0.01f,0.01f));
+                }
+
+                // wind code - random chance per frame to change
+
+                for(WindParticle particle : windParticles){
+                    particle.updatePos(wind);
+                    particle.draw(sr);
+                }
+
+
+                player.applyForce(wind);
+
                 player.updatePos();
 
                 if(player.getLaunched() && player.getLaunchAvailable()){
@@ -584,7 +609,7 @@ public class Main extends ApplicationAdapter {
                 mouseForce.limit(10f);
 
                 if(mDown&&(!player.getLaunched()||player.getLaunchAvailable())&&ready){
-                    player.genTrail(planets,sr,mouseForce);
+                    player.genTrail(planets,sr,mouseForce,wind);
                     Vector2 ghostMouse = mousePos.cpy()
                         .sub(staticMousePos)
                         .limit(100)
