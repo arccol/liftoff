@@ -495,6 +495,10 @@ public class Main extends ApplicationAdapter {
 
                 player.setDisToPlanet(9999);
 
+                if(player.getLaunched()){
+                    player.applyForce(wind);
+                }
+
                 for(RealPlanet planet : planets) {
                     if (planet == null) {
                         continue;
@@ -582,15 +586,16 @@ public class Main extends ApplicationAdapter {
                     wind.set(rand.nextFloat(-0.01f,0.01f),rand.nextFloat(-0.01f,0.01f));
                 }
 
+                if(Gdx.input.isKeyJustPressed(Input.Keys.R)){
+                    reset();
+                }
+
                 // wind code - random chance per frame to change
 
                 for(WindParticle particle : windParticles){
                     particle.updatePos(wind);
                     particle.draw(sr);
                 }
-
-
-                player.applyForce(wind);
 
                 player.updatePos();
 
@@ -674,5 +679,13 @@ public class Main extends ApplicationAdapter {
 
     public void resize(int width, int height){
         stage.getViewport().update(width, height, true);
+    }
+
+    public void advanceLevel(){
+
+    }
+
+    public void reset(){
+        player.reset();
     }
 }

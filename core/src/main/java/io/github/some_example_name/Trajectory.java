@@ -33,6 +33,8 @@ public class Trajectory {
         vel.add(mouseForce);
         for(int i=0;i<markers.length;i++) {
             markers[i] = new Vector2();
+            vel.add(wind);
+
             for (RealPlanet planet : planets) {
                 if (planet == null) {
                     continue;
@@ -56,7 +58,6 @@ public class Trajectory {
                     vel.add(planetDir.scl(strength));
                 }
             }
-            vel.add(wind);
             pos.add(vel);
             markers[i].set(pos.cpy());
         }

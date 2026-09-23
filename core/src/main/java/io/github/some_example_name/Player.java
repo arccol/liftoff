@@ -177,4 +177,12 @@ public class Player {
     public float getDisToPlanet(){
         return distanceToPlanet;
     }
+
+    public void reset() {
+        position.set(600,400);
+        vel.set(0,0);
+        accel.set(0,0);
+        win = false;
+        launched = false;
+    }
 }
