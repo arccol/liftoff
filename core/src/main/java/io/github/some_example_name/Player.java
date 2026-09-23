@@ -93,7 +93,7 @@ public class Player {
         return position;
     }
 
-    public void genTrail(List<RealPlanet> planets, ShapeRenderer sr, Vector2 mouseForce, Vector2 wind){
+    public void genTraj(List<RealPlanet> planets, ShapeRenderer sr, Vector2 mouseForce, Vector2 wind){
         traj = new Trajectory(vel, position, planets, sr, mouseForce, rad, wind);
         traj.generate();
     }

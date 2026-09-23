@@ -3,9 +3,7 @@ package io.github.some_example_name;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
@@ -17,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+import javax.swing.plaf.ColorUIResource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -66,6 +65,8 @@ public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
     private Vector2 wind;
     private List<WindParticle> windParticles;
+    private Pixmap cursorPixmap;
+    private Cursor cursor;
 
     private boolean inventoryDrag;
 
@@ -80,6 +81,7 @@ public class Main extends ApplicationAdapter {
         backgroundTexture = new Texture(Gdx.files.internal("background.png"));
         titlePageTexture = new Texture(Gdx.files.internal("liftoff.png"));
         tutorialTexture = new Texture(Gdx.files.internal("tutorial.png"));
+        cursorPixmap = new Pixmap(Gdx.files.internal("cursor.png"));
         wind = new Vector2();
         wind.set(0,0);
         coinList = new ArrayList<>();
@@ -110,6 +112,9 @@ public class Main extends ApplicationAdapter {
         changeScreen(Screen.HOME);
         Gdx.graphics.setResizable(false);
         batch = new SpriteBatch();
+        cursor = Gdx.graphics.newCursor(cursorPixmap,10,2);
+        cursorPixmap.dispose();
+        Gdx.graphics.setCursor(cursor);
     }
 
     public void changeScreen(Screen screen){
@@ -583,7 +588,7 @@ public class Main extends ApplicationAdapter {
                 }
 
                 if(Gdx.input.isKeyJustPressed(Input.Keys.W)){
-                    wind.set(rand.nextFloat(-0.01f,0.01f),rand.nextFloat(-0.01f,0.01f));
+                    wind.set(rand.nextFloat(-0.1f,0.1f),rand.nextFloat(-0.1f,0.1f));
                 }
 
                 if(Gdx.input.isKeyJustPressed(Input.Keys.R)){
@@ -614,7 +619,7 @@ public class Main extends ApplicationAdapter {
                 mouseForce.limit(10f);
 
                 if(mDown&&(!player.getLaunched()||player.getLaunchAvailable())&&ready){
-                    player.genTrail(planets,sr,mouseForce,wind);
+                    player.genTraj(planets,sr,mouseForce,wind);
                     Vector2 ghostMouse = mousePos.cpy()
                         .sub(staticMousePos)
                         .limit(100)
