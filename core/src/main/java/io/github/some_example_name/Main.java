@@ -67,6 +67,7 @@ public class Main extends ApplicationAdapter {
     private List<WindParticle> windParticles;
     private Pixmap cursorPixmap;
     private Cursor cursor;
+    private float windBound = 0.03f;
 
     private boolean inventoryDrag;
 
@@ -92,7 +93,7 @@ public class Main extends ApplicationAdapter {
         for(int x=0;x<Gdx.graphics.getWidth();x++){
             for(int y=0;y<Gdx.graphics.getHeight();y++) {
                 if (x % 100 == 0 && y % 100 == 0 && rand.nextInt(1,5)==4) {
-                    windParticles.add(new WindParticle(x+rand.nextInt(1,50), y+rand.nextInt(1,50), 5));
+                    windParticles.add(new WindParticle(x+rand.nextInt(1,50), y+rand.nextInt(1,50), 5, windBound));
                 }
             }
         }
@@ -588,7 +589,7 @@ public class Main extends ApplicationAdapter {
                 }
 
                 if(Gdx.input.isKeyJustPressed(Input.Keys.W)){
-                    wind.set(rand.nextFloat(-0.1f,0.1f),rand.nextFloat(-0.1f,0.1f));
+                    wind.set(rand.nextFloat(-windBound,windBound),rand.nextFloat(-windBound,windBound));
                 }
 
                 if(Gdx.input.isKeyJustPressed(Input.Keys.R)){

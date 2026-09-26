@@ -17,14 +17,14 @@ public class WindParticle {
     List<Vector2> trail;
     Vector2 randomvec;
 
-    public WindParticle(int x, int y, int rad){
+    public WindParticle(int x, int y, int rad, float windBound){
         pos = new Vector2();
         rand = new Random();
         pos.set(x,y);
         this.rad = rad;
         trail = new ArrayList<>();
         randomvec = new Vector2();
-        randomvec.set(rand.nextFloat(-0.001f,0.001f), rand.nextFloat(-0.001f,0.001f));
+        randomvec.set(rand.nextFloat(-windBound/100,windBound/100), rand.nextFloat(-windBound/100,windBound/100));
     }
 
     public void draw(ShapeRenderer sr){
