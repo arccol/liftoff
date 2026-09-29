@@ -37,7 +37,7 @@ public class CoinSpawner {
         return totalcoins;
     }
 
-    public void updateCoins(int amount){
+    public void changeCoins(int amount){
         totalcoins+=amount;
     }
 }

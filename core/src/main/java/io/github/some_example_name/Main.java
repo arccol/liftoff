@@ -15,7 +15,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-import javax.swing.plaf.ColorUIResource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -34,7 +33,8 @@ public class Main extends ApplicationAdapter {
         HOME,
         SETTINGS,
         GAME,
-        TUTORIAL
+        TUTORIAL,
+        LEVELSELECT
     }
     private Screen currentScreen;
     private boolean mDown;
@@ -68,6 +68,7 @@ public class Main extends ApplicationAdapter {
     private Pixmap cursorPixmap;
     private Cursor cursor;
     private float windBound = 0.03f;
+    private boolean sandbox;
 
     private boolean inventoryDrag;
 
@@ -113,6 +114,7 @@ public class Main extends ApplicationAdapter {
         changeScreen(Screen.HOME);
         Gdx.graphics.setResizable(false);
         batch = new SpriteBatch();
+        sandbox = false;
         cursor = Gdx.graphics.newCursor(cursorPixmap,10,2);
         cursorPixmap.dispose();
         Gdx.graphics.setCursor(cursor);
@@ -137,7 +139,38 @@ public class Main extends ApplicationAdapter {
             case TUTORIAL:
                 createTutorialScreen();
                 break;
+            case LEVELSELECT:
+                createLevelScreen();
         }
+    }
+
+    private void createLevelScreen(){
+        bufferFrames = 0;
+
+        TextButton play = new TextButton("Random Level", skin);
+        play.setPosition(810,196);
+        play.setSize(300,136);
+        play.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                changeScreen(Screen.GAME);
+                generateLevel();
+            }
+        });
+
+        TextButton settings = new TextButton("Sandbox", skin);
+        settings.setPosition(300, 196);
+        settings.setSize(300,136);
+        settings.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                changeScreen(Screen.GAME);
+                sandbox = true;
+            }
+        });
+
+        stage.addActor(play);
+        stage.addActor(settings);
     }
 
     private void createHomeScreen(){
@@ -149,7 +182,7 @@ public class Main extends ApplicationAdapter {
         play.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                changeScreen(Screen.GAME);
+                changeScreen(Screen.LEVELSELECT);
             }
         });
 
@@ -544,9 +577,7 @@ public class Main extends ApplicationAdapter {
 
                 if(player.getWin()){
                     player.setWin(false);
-
-                    // advance level
-
+                    generateLevel();
                 }
 
                 if(Gdx.input.isKeyJustPressed(Input.Keys.P)){
@@ -687,8 +718,29 @@ public class Main extends ApplicationAdapter {
         stage.getViewport().update(width, height, true);
     }
 
-    public void advanceLevel(){
-
+    public void generateLevel(){
+        player.reset();
+        planets.clear();
+        coinList.clear();
+        debrisList.clear();
+        coinSpawner.changeCoins(-coinSpawner.getCoins());
+        for(int i=0;i<rand.nextInt(1,10);i++){
+            int rx = rand.nextInt(100,1820);
+            int ry = rand.nextInt(100,980);
+            int rr = rand.nextInt(15,40);
+            int rd = rand.nextInt(1,5);
+            planets.add(new RealPlanet(rx,ry,rr,rd,coinList,planetTexture,false,goalFlagTexture));
+            planets.get(i).generateCoins();
+        }
+        int rx = rand.nextInt(100,1820);
+        int ry = rand.nextInt(100,980);
+        int rr = rand.nextInt(10,20);
+        int rd = rand.nextInt(1,3);
+        planets.add(new RealPlanet(rx,ry,rr,rd,coinList,planetTexture,true,goalFlagTexture));
+        wind.set(rand.nextFloat(-windBound,windBound),rand.nextFloat(-windBound,windBound));
+        for(int i=0;i<5;i++) {
+            generateDebris();
+        }
     }
 
     public void reset(){
