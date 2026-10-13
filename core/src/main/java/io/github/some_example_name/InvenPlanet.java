@@ -49,8 +49,8 @@ public class InvenPlanet {
         }
     }
 
-    public void updatePos(){
-        position.add(vel);
+    public void updatePos(long delta){
+        position.add(vel.cpy().scl(delta).scl(0.1f));
         vel.scl(0.99f);
     }
 
