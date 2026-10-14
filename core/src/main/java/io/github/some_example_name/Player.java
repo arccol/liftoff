@@ -61,8 +61,8 @@ public class Player {
         trail.add(prevpos.cpy());
     }
 
-    public void applyForce(Vector2 force) {
-        vel.add(force);
+    public void applyForce(Vector2 force, float delta) {
+        vel.add(force).cpy().scl(delta);
     }
 
     public void draw(SpriteBatch batch) {

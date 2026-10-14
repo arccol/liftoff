@@ -535,7 +535,7 @@ public class Main extends ApplicationAdapter {
                 player.setDisToPlanet(9999);
 
                 if(player.getLaunched()){
-                    player.applyForce(wind);
+                    player.applyForce(wind, delta);
                 }
 
                 for(RealPlanet planet : planets) {
@@ -568,9 +568,7 @@ public class Main extends ApplicationAdapter {
 
                             strength = Math.min(strength, 5f);
 
-                            player.applyForce(
-                                planetDir.scl(strength)
-                            );
+                            player.applyForce(planetDir.scl(strength), delta);
                         }
                     }
                 }
@@ -681,7 +679,7 @@ public class Main extends ApplicationAdapter {
                 if((!player.getLaunched()||player.getLaunchAvailable())&&!mDown&&mWasDown&&bufferFrames>10){
                     player.setLaunched(true);
                     player.setLaunchAvailable(false);
-                    player.applyForce(mouseForce);
+                    player.applyForce(mouseForce, delta);
                 }
 
                 coinSpawner.draw(sr);
