@@ -29,8 +29,6 @@ public class Main extends ApplicationAdapter {
     private Vector2 mousePos;
     private Stage stage;
     private Skin skin;
-    private long deltaTime;
-    private long currentTime;
     enum Screen{
         HOME,
         SETTINGS,
@@ -315,10 +313,10 @@ public class Main extends ApplicationAdapter {
         potPlanets.add(new InvenPlanet((int) spawnX, (int) spawnY, rr, rd, planetTexture));
     }
 
-    private void updatePot(long delta){
+    private void updatePot(){
         for(InvenPlanet p : potPlanets){
             p.applyGrav();
-            p.updatePos(delta);
+            p.updatePos();
             p.constrainToPot(potCenter, potRadius, potTopDegree);
         }
 
@@ -461,9 +459,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
-        long delta = System.currentTimeMillis() - currentTime;
-        currentTime = System.currentTimeMillis();
-
+        float delta = Gdx.graphics.getDeltaTime();
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.begin();
@@ -471,7 +467,7 @@ public class Main extends ApplicationAdapter {
         batch.draw(backgroundTexture,0,0);
         batch.end();
 
-        stage.act((float) delta);
+        stage.act(delta);
         stage.draw();
 
         mousePos.set(
@@ -534,12 +530,12 @@ public class Main extends ApplicationAdapter {
 
         switch(currentScreen){
             case GAME:
-                updatePot(delta);
+                updatePot();
 
                 player.setDisToPlanet(9999);
 
                 if(player.getLaunched()){
-                    player.applyForce(wind, delta);
+                    player.applyForce(wind);
                 }
 
                 for(RealPlanet planet : planets) {
@@ -573,7 +569,7 @@ public class Main extends ApplicationAdapter {
                             strength = Math.min(strength, 5f);
 
                             player.applyForce(
-                                planetDir.scl(strength), delta
+                                planetDir.scl(strength)
                             );
                         }
                     }
@@ -685,7 +681,7 @@ public class Main extends ApplicationAdapter {
                 if((!player.getLaunched()||player.getLaunchAvailable())&&!mDown&&mWasDown&&bufferFrames>10){
                     player.setLaunched(true);
                     player.setLaunchAvailable(false);
-                    player.applyForce(mouseForce, delta);
+                    player.applyForce(mouseForce);
                 }
 
                 coinSpawner.draw(sr);
