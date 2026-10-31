@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -12,11 +13,13 @@ import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class Main extends ApplicationAdapter {
@@ -69,6 +72,11 @@ public class Main extends ApplicationAdapter {
     private Cursor cursor;
     private float windBound = 0.03f;
     private boolean sandbox;
+    private Texture whiteTexture;
+    private Table sandboxPanel;
+    private Label sandboxStatus;
+    private int sbRadius = 25;
+    private int sbDensity = 2;
 
     private boolean inventoryDrag;
 
@@ -83,6 +91,11 @@ public class Main extends ApplicationAdapter {
         backgroundTexture = new Texture(Gdx.files.internal("background.png"));
         titlePageTexture = new Texture(Gdx.files.internal("liftoff.png"));
         tutorialTexture = new Texture(Gdx.files.internal("tutorial.png"));
+        Pixmap whitePixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        whitePixmap.setColor(1f, 1f, 1f, 1f);
+        whitePixmap.fill();
+        whiteTexture = new Texture(whitePixmap);
+        whitePixmap.dispose();
         cursorPixmap = new Pixmap(Gdx.files.internal("cursor.png"));
         wind = new Vector2();
         wind.set(0,0);
@@ -124,7 +137,10 @@ public class Main extends ApplicationAdapter {
         currentScreen = screen;
         if(screen != Screen.GAME){
             selectedInvenPlanet = null;
+            sandbox = false;
         }
+        sandboxPanel = null;
+        sandboxStatus = null;
         stage.clear();
         switch(screen){
             case HOME:
@@ -164,8 +180,7 @@ public class Main extends ApplicationAdapter {
         settings.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                changeScreen(Screen.GAME);
-                sandbox = true;
+                startSandbox();
             }
         });
 
@@ -303,6 +318,10 @@ public class Main extends ApplicationAdapter {
         });
 
         stage.addActor(back);
+
+        if(sandbox){
+            createSandboxPanel();
+        }
     }
 
     private void spawnPotPlanet(){
@@ -514,12 +533,18 @@ public class Main extends ApplicationAdapter {
             selectedInvenPlanet = null;
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.D)){
+        if(currentScreen == Screen.GAME && Gdx.input.isKeyJustPressed(Input.Keys.D)){
             generateDebris();
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
-            planets.add(new RealPlanet((int) mousePos.x, (int) mousePos.y,20,1, coinList, planetTexture, true, goalFlagTexture));
+        if(currentScreen == Screen.GAME && Gdx.input.isKeyJustPressed(Input.Keys.F)){
+            int goalRad = 20;
+            int goalDens = 1;
+            if(sandbox){
+                goalRad = sbRadius;
+                goalDens = sbDensity;
+            }
+            planets.add(new RealPlanet((int) mousePos.x, (int) mousePos.y, goalRad, goalDens, coinList, planetTexture, true, goalFlagTexture));
         }
 
         if(leftJustPressed && !inventoryDrag){
@@ -531,6 +556,10 @@ public class Main extends ApplicationAdapter {
         switch(currentScreen){
             case GAME:
                 updatePot();
+
+                if(sandbox){
+                    updateSandbox(delta);
+                }
 
                 player.setDisToPlanet(9999);
 
@@ -575,7 +604,9 @@ public class Main extends ApplicationAdapter {
 
                 if(player.getWin()){
                     player.setWin(false);
-                    generateLevel();
+                    if(!sandbox){
+                        generateLevel();
+                    }
                 }
 
                 if(Gdx.input.isKeyJustPressed(Input.Keys.P)){
@@ -710,10 +741,164 @@ public class Main extends ApplicationAdapter {
     public void dispose() {
         stage.dispose();
         skin.dispose();
+        whiteTexture.dispose();
     }
 
     public void resize(int width, int height){
         stage.getViewport().update(width, height, true);
+    }
+
+    private void startSandbox(){
+        sandbox = true;
+        changeScreen(Screen.GAME);
+        clearWorld();
+        player.reset();
+        wind.set(0, 0);
+        sbRadius = 25;
+        sbDensity = 2;
+    }
+
+    private void clearWorld(){
+        planets.clear();
+        debrisList.clear();
+        coinList.clear();
+        coinSpawner.changeCoins(-coinSpawner.getCoins());
+    }
+
+    private void createSandboxPanel(){
+        String[][] binds = {
+            {"R", "reset player"},
+            {"C", "clear everything"},
+            {"SPACE", "place normal planet"},
+            {"F", "place goal planet"},
+            {"Z", "delete"},
+            {"[ ]", "change radius"},
+            {"- =", "change density"},
+            {"E", "spawn single debris"},
+            {"D", "spawn debris field"},
+            {"X", "clear debris"},
+            {"W / Q", "random / no wind"},
+            {"Arrows", "adjust wind"},
+            {"P", "add planet to inventory"},
+        };
+
+        Table t = new Table();
+        t.setBackground(new TextureRegionDrawable(new TextureRegion(whiteTexture)).tint(new Color(0f, 0f, 0f, 0.6f)));
+        t.pad(10);
+
+        Label title = new Label("Sandbox                                (H: hide)", skin);
+        title.setColor(0.5f, 0.8f, 1f, 1f);
+        t.add(title).colspan(2).left().padBottom(6).row();
+
+        for(String[] b : binds){
+            Label key = new Label(b[0], skin);
+            key.setColor(1f, 0.85f, 0.3f, 1f);
+            t.add(key).left().padRight(14);
+            t.add(new Label(b[1], skin)).left().row();
+        }
+
+        sandboxStatus = new Label("", skin);
+        sandboxStatus.setColor(0.7f, 1f, 0.7f, 1f);
+        updateSandboxStatus();
+        t.add(sandboxStatus).colspan(2).left().padTop(8);
+        t.pack();
+        t.setPosition(Gdx.graphics.getWidth()-t.getWidth()-10, Gdx.graphics.getHeight()-t.getHeight()-10);
+        stage.addActor(t);
+        sandboxPanel = t;
+    }
+
+    private void updateSandboxStatus(){
+        if(sandboxStatus == null) return;
+        sandboxStatus.setText(String.format(Locale.UK, "Wind  %+.3f, %+.3f\nPlanet  radius %d  density %d\nPlanets %d   Debris %d",
+                                                                wind.x, wind.y,             sbRadius, sbDensity, planets.size(), debrisList.size()));
+    }
+
+    private void updateSandbox(float delta){
+        if(Gdx.input.isKeyJustPressed(Input.Keys.H) && sandboxPanel != null){
+            sandboxPanel.setVisible(!sandboxPanel.isVisible());
+        }
+
+        float windMax = windBound * 2f;
+        float windStep = 0.05f * delta;
+
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) { // wind
+            wind.x -= windStep;
+        }
+        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+            wind.x += windStep;
+        }
+        if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            wind.y -= windStep;
+        }
+        if(Gdx.input.isKeyPressed(Input.Keys.UP)){
+            wind.y += windStep;
+        }
+        wind.x = MathUtils.clamp(wind.x, -windMax, windMax);
+        wind.y = MathUtils.clamp(wind.y, -windMax, windMax);
+        if(Gdx.input.isKeyJustPressed(Input.Keys.Q)){
+            wind.set(0, 0);
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.LEFT_BRACKET)) { // adjust planet
+            sbRadius = Math.max(5, sbRadius - 5);
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.RIGHT_BRACKET)){
+            sbRadius = Math.min(80, sbRadius + 5);
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.MINUS)){
+            sbDensity = Math.max(1, sbDensity - 1);
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.EQUALS)){
+            sbDensity = Math.min(9, sbDensity + 1);
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !isOverPot(mousePos)){ // place planet
+            RealPlanet placed = new RealPlanet((int) mousePos.x, (int) mousePos.y, sbRadius, sbDensity,
+                coinList, planetTexture, false, goalFlagTexture);
+            placed.generateCoins();
+            planets.add(placed);
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.Z)){ // delete at cursor
+            boolean removed = false;
+            for(int i = planets.size() - 1; i >= 0; i--){
+                RealPlanet p = planets.get(i);
+                if(p != null && p.getPosition().dst(mousePos) <= p.getSize() + 6){
+                    planets.remove(i);
+                    coinList.removeIf(c -> c.getPos().dst(p.getPosition()) <= p.getSize() + p.offset + 3);
+                    removed = true;
+                    break;
+                }
+            }
+            if(!removed){
+                Debris nearest = null;
+                float best = 30f;
+                for(Debris d : debrisList){
+                    float dist = d.getPosition().dst(mousePos);
+                    if(dist < best){
+                        best = dist;
+                        nearest = d;
+                    }
+                }
+                if(nearest != null){
+                    debrisList.remove(nearest);
+                }
+            }
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.E)){
+            debrisList.add(new Debris((int) mousePos.x, (int) mousePos.y, 8, debrisTexture1, debrisTexture2, debrisTexture3));
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.X)){
+            debrisList.clear();
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.C)){
+            clearWorld();
+        }
+
+        updateSandboxStatus();
     }
 
     public void generateLevel(){
