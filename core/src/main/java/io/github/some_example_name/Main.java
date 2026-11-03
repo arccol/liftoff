@@ -46,7 +46,7 @@ public class Main extends ApplicationAdapter {
     private boolean ready;
     private Vector2 staticMousePos;
     private int targetFps = 60;
-    private float volume = 1.0f;
+    private float opacity = 0.5f;
     private Random rand;
     private List<InvenPlanet> potPlanets;
     private InvenPlanet selectedInvenPlanet;
@@ -234,28 +234,28 @@ public class Main extends ApplicationAdapter {
         title.setSize(300, 60);
         stage.addActor(title);
 
-        Label volumeLabel = new Label("Volume", skin);
-        volumeLabel.setPosition(400, 500);
-        volumeLabel.setSize(180, 50);
+        Label opacityLabel = new Label("Wind Opacity", skin);
+        opacityLabel.setPosition(400, 500);
+        opacityLabel.setSize(180, 50);
 
-        Slider volumeSlider = new Slider(0f, 1f, 0.01f, false, skin);
-        volumeSlider.setValue(volume);
-        volumeSlider.setPosition(600, 515);
-        volumeSlider.setSize(220, 30);
+        Slider opacitySlider = new Slider(0f, 1f, 0.01f, false, skin);
+        opacitySlider.setValue(opacity);
+        opacitySlider.setPosition(600, 515);
+        opacitySlider.setSize(220, 30);
 
-        Label volumeValue = new Label((int)(volume * 100) + "%", skin);
-        volumeValue.setPosition(840, 500);
-        volumeValue.setSize(100, 50);
-        volumeSlider.addListener(new ChangeListener() {
+        Label opacityValue = new Label((int)(opacity * 100) + "%", skin);
+        opacityValue.setPosition(840, 500);
+        opacityValue.setSize(100, 50);
+        opacitySlider.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                volume = volumeSlider.getValue();
-                volumeValue.setText((int)(volume * 100) + "%");
+                opacity = opacitySlider.getValue();
+                opacityValue.setText((int)(opacity * 100) + "%");
             }
         });
-        stage.addActor(volumeLabel);
-        stage.addActor(volumeSlider);
-        stage.addActor(volumeValue);
+        stage.addActor(opacityLabel);
+        stage.addActor(opacitySlider);
+        stage.addActor(opacityValue);
 
         Label fpsLabel = new Label("Framerate", skin);
         fpsLabel.setPosition(400, 380);
@@ -602,13 +602,6 @@ public class Main extends ApplicationAdapter {
                     }
                 }
 
-                if(player.getWin()){
-                    player.setWin(false);
-                    if(!sandbox){
-                        generateLevel();
-                    }
-                }
-
                 if(Gdx.input.isKeyJustPressed(Input.Keys.P)){
                     spawnPotPlanet();
                 }
@@ -656,11 +649,9 @@ public class Main extends ApplicationAdapter {
                     reset();
                 }
 
-                // wind code - random chance per frame to change
-
                 for(WindParticle particle : windParticles){
                     particle.updatePos(wind);
-                    particle.draw(sr);
+                    particle.draw(sr, opacity);
                 }
 
                 player.updatePos();
@@ -718,6 +709,7 @@ public class Main extends ApplicationAdapter {
                 player.drawTrail(sr);
                 player.draw(batch);
                 drawPot(sr);
+                checkWin();
                 break;
             case TUTORIAL:
                 batch.begin();
@@ -756,6 +748,13 @@ public class Main extends ApplicationAdapter {
         wind.set(0, 0);
         sbRadius = 25;
         sbDensity = 2;
+    }
+
+    private void checkWin(){
+        if(player.getWin()&&coinSpawner.getCoins()>5){
+            clearWorld();
+            reset();
+        }
     }
 
     private void clearWorld(){
@@ -902,11 +901,8 @@ public class Main extends ApplicationAdapter {
     }
 
     public void generateLevel(){
-        player.reset();
-        planets.clear();
-        coinList.clear();
-        debrisList.clear();
-        coinSpawner.changeCoins(-coinSpawner.getCoins());
+        reset();
+        clearWorld();
         for(int i=0;i<rand.nextInt(1,10);i++){
             int rx = rand.nextInt(100,1820);
             int ry = rand.nextInt(100,980);
@@ -921,7 +917,7 @@ public class Main extends ApplicationAdapter {
         int rd = rand.nextInt(1,3);
         planets.add(new RealPlanet(rx,ry,rr,rd,coinList,planetTexture,true,goalFlagTexture));
         wind.set(rand.nextFloat(-windBound,windBound),rand.nextFloat(-windBound,windBound));
-        for(int i=0;i<5;i++) {
+        for(int i=0;i<3;i++) {
             generateDebris();
         }
     }

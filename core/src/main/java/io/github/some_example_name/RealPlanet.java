@@ -49,6 +49,10 @@ public class RealPlanet {
         batch.end();
     }
 
+    public boolean getFinish(){
+        return finish;
+    }
+
     public int getDens(){
         return dens;
     }

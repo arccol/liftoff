@@ -27,15 +27,15 @@ public class WindParticle {
         randomvec.set(rand.nextFloat(-windBound/100,windBound/100), rand.nextFloat(-windBound/100,windBound/100));
     }
 
-    public void draw(ShapeRenderer sr){
+    public void draw(ShapeRenderer sr, float opacity){
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        sr.setColor(0f,0f,0f,0.02f);
+        sr.setColor(0f,0f,0f,0.04f*opacity);
         sr.circle(pos.x,pos.y,rad);
 
         for (int i = 0; i < trail.size(); i++) {
             if (trail.size() - 20 < i) {
-                sr.setColor(0f, 0f, 0f, 0.02f-(trail.size()-i)/1000f);
+                sr.setColor(0f, 0f, 0f, (0.04f-(trail.size()-i)/1000f)*opacity);
                 sr.circle(trail.get(i).x, trail.get(i).y, 5);
             }
         }
