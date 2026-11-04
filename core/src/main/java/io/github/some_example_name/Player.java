@@ -54,7 +54,6 @@ public class Player {
     }
 
     public void updatePos(){
-        win = false;
         position.add(vel);
         movementVector.set(position.cpy().sub(prevpos));
         prevpos.set(position.cpy());

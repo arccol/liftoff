@@ -184,6 +184,17 @@ public class Main extends ApplicationAdapter {
             }
         });
 
+        TextButton back = new TextButton("Back", skin);
+        back.setPosition(0, Gdx.graphics.getHeight() - 60);
+        back.setSize(100, 60);
+        back.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                changeScreen(Screen.HOME);
+            }
+        });
+
+        stage.addActor(back);
         stage.addActor(play);
         stage.addActor(settings);
     }
@@ -577,6 +588,7 @@ public class Main extends ApplicationAdapter {
                         player.setDisToPlanet(player.getPosition().cpy().sub(planet.getPosition().cpy()).len());
                     }
 
+                    player.setWin(false);
                     if(player.checkColPlanet(planet)) {
                         player.moveCol(planet);
                     }
@@ -603,7 +615,14 @@ public class Main extends ApplicationAdapter {
                 }
 
                 if(Gdx.input.isKeyJustPressed(Input.Keys.P)){
-                    spawnPotPlanet();
+                    if(!sandbox) {
+                        if (coinSpawner.getCoins() > 0) {
+                            coinSpawner.changeCoins(-1);
+                            spawnPotPlanet();
+                        }
+                    }else{
+                        spawnPotPlanet();
+                    }
                 }
 
                 for(Debris d : debrisList){
@@ -751,9 +770,8 @@ public class Main extends ApplicationAdapter {
     }
 
     private void checkWin(){
-        if(player.getWin()&&coinSpawner.getCoins()>5){
-            clearWorld();
-            reset();
+        if(player.getWin()&&coinSpawner.getCoins()>4){
+            generateLevel();
         }
     }
 
@@ -820,7 +838,7 @@ public class Main extends ApplicationAdapter {
         float windMax = windBound * 2f;
         float windStep = 0.05f * delta;
 
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) { // wind
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             wind.x -= windStep;
         }
         if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
@@ -838,7 +856,7 @@ public class Main extends ApplicationAdapter {
             wind.set(0, 0);
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.LEFT_BRACKET)) { // adjust planet
+        if(Gdx.input.isKeyJustPressed(Input.Keys.LEFT_BRACKET)) {
             sbRadius = Math.max(5, sbRadius - 5);
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.RIGHT_BRACKET)){
@@ -851,14 +869,14 @@ public class Main extends ApplicationAdapter {
             sbDensity = Math.min(9, sbDensity + 1);
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !isOverPot(mousePos)){ // place planet
+        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !isOverPot(mousePos)){
             RealPlanet placed = new RealPlanet((int) mousePos.x, (int) mousePos.y, sbRadius, sbDensity,
                 coinList, planetTexture, false, goalFlagTexture);
             placed.generateCoins();
             planets.add(placed);
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.Z)){ // delete at cursor
+        if(Gdx.input.isKeyJustPressed(Input.Keys.Z)){
             boolean removed = false;
             for(int i = planets.size() - 1; i >= 0; i--){
                 RealPlanet p = planets.get(i);
