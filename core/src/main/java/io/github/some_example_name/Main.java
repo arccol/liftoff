@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -64,6 +65,7 @@ public class Main extends ApplicationAdapter {
     private Texture goalFlagTexture;
     private Texture backgroundTexture;
     private Texture titlePageTexture;
+    private Texture levelSelectTexture;
     private Texture tutorialTexture;
     private SpriteBatch batch;
     private Vector2 wind;
@@ -77,6 +79,7 @@ public class Main extends ApplicationAdapter {
     private Label sandboxStatus;
     private int sbRadius = 25;
     private int sbDensity = 2;
+    private BitmapFont font;
 
     private boolean inventoryDrag;
 
@@ -90,7 +93,9 @@ public class Main extends ApplicationAdapter {
         goalFlagTexture = new Texture(Gdx.files.internal("goalFlag.png"));
         backgroundTexture = new Texture(Gdx.files.internal("background.png"));
         titlePageTexture = new Texture(Gdx.files.internal("liftoff.png"));
+        levelSelectTexture = new Texture(Gdx.files.internal("levels.png"));
         tutorialTexture = new Texture(Gdx.files.internal("tutorial.png"));
+        font = new BitmapFont();
         Pixmap whitePixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         whitePixmap.setColor(1f, 1f, 1f, 1f);
         whitePixmap.fill();
@@ -164,8 +169,8 @@ public class Main extends ApplicationAdapter {
         bufferFrames = 0;
 
         TextButton play = new TextButton("Random Level", skin);
-        play.setPosition(810,196);
-        play.setSize(300,136);
+        play.setPosition(1059,262);
+        play.setSize(589,589);
         play.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -175,8 +180,8 @@ public class Main extends ApplicationAdapter {
         });
 
         TextButton settings = new TextButton("Sandbox", skin);
-        settings.setPosition(300, 196);
-        settings.setSize(300,136);
+        settings.setPosition(372, 295);
+        settings.setSize(506,506);
         settings.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -578,6 +583,8 @@ public class Main extends ApplicationAdapter {
                     player.applyForce(wind, delta);
                 }
 
+                player.setWin(false);
+
                 for(RealPlanet planet : planets) {
                     if (planet == null) {
                         continue;
@@ -588,7 +595,6 @@ public class Main extends ApplicationAdapter {
                         player.setDisToPlanet(player.getPosition().cpy().sub(planet.getPosition().cpy()).len());
                     }
 
-                    player.setWin(false);
                     if(player.checkColPlanet(planet)) {
                         player.moveCol(planet);
                     }
@@ -724,7 +730,13 @@ public class Main extends ApplicationAdapter {
                 }
 
                 coinSpawner.draw(sr);
+                sr.setColor(Color.GOLDENROD);
+                sr.circle(25,995,20);
                 sr.end();
+                batch.begin();
+                font.setColor(Color.RED);
+                font.draw(batch,""+(Math.max(5-coinSpawner.getCoins(),0)),20,1000);
+                batch.end();
                 player.drawTrail(sr);
                 player.draw(batch);
                 drawPot(sr);
@@ -742,6 +754,11 @@ public class Main extends ApplicationAdapter {
                 batch.draw(titlePageTexture,0,0);
                 batch.end();
                 break;
+            case LEVELSELECT:
+                batch.begin();
+                batch.setColor(Color.WHITE);
+                batch.draw(levelSelectTexture,0,0);
+                batch.end();
         }
         sr.end();
         mWasDown = mDown;
@@ -926,8 +943,16 @@ public class Main extends ApplicationAdapter {
             int ry = rand.nextInt(100,980);
             int rr = rand.nextInt(15,40);
             int rd = rand.nextInt(1,5);
-            planets.add(new RealPlanet(rx,ry,rr,rd,coinList,planetTexture,false,goalFlagTexture));
-            planets.get(i).generateCoins();
+            boolean valid = true;
+            for(RealPlanet planet : planets){
+                if(Math.abs(planet.getPosition().x-rx)<rr&&Math.abs(planet.getPosition().y-ry)<rr){
+                    valid = false;
+                }
+            }
+            if(valid) {
+                planets.add(new RealPlanet(rx, ry, rr, rd, coinList, planetTexture, false, goalFlagTexture));
+                planets.get(i).generateCoins();
+            }
         }
         int rx = rand.nextInt(100,1820);
         int ry = rand.nextInt(100,980);
