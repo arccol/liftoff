@@ -50,7 +50,7 @@ public class Main extends ApplicationAdapter {
     private Random rand;
     private List<InvenPlanet> potPlanets;
     private InvenPlanet selectedInvenPlanet;
-    private Vector2 potCenter;
+    private Vector2 potCentre;
     private float potRadius;
     private float potTopDegree = 35f;
     private float lossMargin = 40f;
@@ -118,7 +118,7 @@ public class Main extends ApplicationAdapter {
         mousePos = new Vector2();
         staticMousePos = new Vector2();
         potPlanets = new ArrayList<>();
-        potCenter = new Vector2(Gdx.graphics.getWidth() - 150, 130);
+        potCentre = new Vector2(Gdx.graphics.getWidth() - 150, 130);
         potRadius = 100;
         stage = new Stage(new ScreenViewport());
         skin = new Skin(Gdx.files.internal("uiskin.json"));
@@ -338,8 +338,8 @@ public class Main extends ApplicationAdapter {
     private void spawnPotPlanet(){
         int rr = rand.nextInt(20) + 20;
         int rd = rand.nextInt(4) + 1;
-        float spawnX = potCenter.x-2+rd;
-        float spawnY = potCenter.y + potRadius + 30;
+        float spawnX = potCentre.x-2+rd;
+        float spawnY = potCentre.y + potRadius + 30;
         potPlanets.add(new InvenPlanet((int) spawnX, (int) spawnY, rr, rd, planetTexture));
     }
 
@@ -347,7 +347,7 @@ public class Main extends ApplicationAdapter {
         for(InvenPlanet p : potPlanets){
             p.applyGrav();
             p.updatePos();
-            p.constrainToPot(potCenter, potRadius, potTopDegree);
+            p.constrainToPot(potCentre, potRadius, potTopDegree);
         }
 
         for(int iter = 0; iter < iterations; iter++){
@@ -361,12 +361,12 @@ public class Main extends ApplicationAdapter {
                 }
             }
             for(InvenPlanet p : potPlanets){
-                p.constrainToPot(potCenter, potRadius, potTopDegree);
+                p.constrainToPot(potCentre, potRadius, potTopDegree);
             }
         }
 
         potPlanets.removeIf(p -> {
-            boolean lost = p.position.dst(potCenter) > potRadius + p.rad + lossMargin;
+            boolean lost = p.position.dst(potCentre) > potRadius + p.rad + lossMargin;
             if(lost && p == selectedInvenPlanet){
                 selectedInvenPlanet = null;
             }
@@ -376,10 +376,10 @@ public class Main extends ApplicationAdapter {
 
     private void drawPot(ShapeRenderer sr){
         sr.begin(ShapeRenderer.ShapeType.Filled);
-        float closedStart = 90f + potTopDegree;
-        float closedDegrees = 360f - (potTopDegree * 2f);
+        float startAngleDeg = 90f + potTopDegree;
+        float arcDegrees = 360f - (potTopDegree * 2f);
 
-        drawRingSegment(sr, potCenter.x, potCenter.y, potRadius, potRadius + 14, closedStart, closedDegrees, new Color(0.35f, 0.22f, 0.12f, 1f));
+        drawRingSegment(sr, potCentre.x, potCentre.y, potRadius, potRadius + 14, startAngleDeg, arcDegrees, new Color(0.35f, 0.22f, 0.12f, 1f));
 
         for(InvenPlanet p : potPlanets){
             p.draw(sr, p == selectedInvenPlanet, batch);
@@ -387,7 +387,7 @@ public class Main extends ApplicationAdapter {
         sr.end();
     }
 
-    private void drawRingSegment(ShapeRenderer sr, float centerX, float centerY, float innerRadius, float outerRadius, float startAngleDeg, float arcDegrees, Color color) {
+    private void drawRingSegment(ShapeRenderer sr, float centreX, float centreY, float innerRadius, float outerRadius, float startAngleDeg, float arcDegrees, Color color) {
         sr.setColor(color);
 
         int segments = Math.max(6, (int)(12 * (float)Math.cbrt(outerRadius) * (arcDegrees / 360f)));
@@ -397,15 +397,15 @@ public class Main extends ApplicationAdapter {
             float a0 = (startAngleDeg + i * step) * MathUtils.degreesToRadians;
             float a1 = (startAngleDeg + (i + 1) * step) * MathUtils.degreesToRadians;
 
-            float ix0 = centerX + innerRadius * MathUtils.cos(a0);
-            float iy0 = centerY + innerRadius * MathUtils.sin(a0);
-            float ox0 = centerX + outerRadius * MathUtils.cos(a0);
-            float oy0 = centerY + outerRadius * MathUtils.sin(a0);
+            float ix0 = centreX + innerRadius * MathUtils.cos(a0);
+            float iy0 = centreY + innerRadius * MathUtils.sin(a0);
+            float ox0 = centreX + outerRadius * MathUtils.cos(a0);
+            float oy0 = centreY + outerRadius * MathUtils.sin(a0);
 
-            float ix1 = centerX + innerRadius * MathUtils.cos(a1);
-            float iy1 = centerY + innerRadius * MathUtils.sin(a1);
-            float ox1 = centerX + outerRadius * MathUtils.cos(a1);
-            float oy1 = centerY + outerRadius * MathUtils.sin(a1);
+            float ix1 = centreX + innerRadius * MathUtils.cos(a1);
+            float iy1 = centreY + innerRadius * MathUtils.sin(a1);
+            float ox1 = centreX + outerRadius * MathUtils.cos(a1);
+            float oy1 = centreY + outerRadius * MathUtils.sin(a1);
 
             sr.triangle(ix0, iy0, ox0, oy0, ix1, iy1);
             sr.triangle(ox0, oy0, ox1, oy1, ix1, iy1);
@@ -423,7 +423,7 @@ public class Main extends ApplicationAdapter {
     }
 
     private boolean isOverPot(Vector2 pos){
-        return potCenter.dst(pos) <= potRadius + 14;
+        return potCentre.dst(pos) <= potRadius + 14;
     }
 
     public void generateDebris(){

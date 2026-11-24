@@ -11,12 +11,6 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import java.util.Random;
 
 public class Perlin {
-    Pixmap pixmap;
-    SpriteBatch spriteBatch;
-    Texture noiseTexture;
-    int octaves = 10;
-    int width = 1280;
-    int height = 960;
     Vector2[] gradients = {
         new Vector2(1, 0),
         new Vector2(-1, 0),
@@ -30,19 +24,6 @@ public class Perlin {
     int[] permutationtable = new int[512];
 
     public Perlin() {
-        pixmap = new Pixmap(width, height, Pixmap.Format.RGB888);
-    }
-
-    public void updatePixmap() {
-        createpermtable();
-
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                float brightness = FBM(x, y, octaves);
-                pixmap.setColor(brightness, brightness, brightness, 1);
-                pixmap.drawPixel(x, y);
-            }
-        }
     }
 
     public void createpermtable() {
@@ -58,7 +39,7 @@ public class Perlin {
             int ri = random.nextInt(i + 1);
 
             int temp = baseValues[i];
-            baseValues[i] = baseValues[ri]; // swap randomindex with current index
+            baseValues[i] = baseValues[ri];
             baseValues[ri] = temp;
         }
 
@@ -97,11 +78,11 @@ public class Perlin {
     }
 
     public float fade(float value) {
-        return value * value * value * (value * (value * 6 - 15) + 10); // smooth curve
+        return value * value * value * (value * (value * 6 - 15) + 10);
     }
 
     public float interpolate(float start, float end, float t) {
-        return start + t * (end - start); // linear interpolation
+        return start + t * (end - start);
     }
 
     public float gradient(int num, float xOffset, float yOffset) {
