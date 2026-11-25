@@ -118,7 +118,7 @@ public class Main extends ApplicationAdapter {
         }
         planets = new ArrayList<>();
         debrisList = new ArrayList<>();
-        player = new Player(600,400,10, playerTexture);
+        player = new Player(100,100,10, playerTexture);
         player.setLaunched(false);
         mousePos = new Vector2();
         staticMousePos = new Vector2();
@@ -776,7 +776,7 @@ public class Main extends ApplicationAdapter {
         sandbox = true;
         changeScreen(Screen.GAME);
         clearWorld();
-        player.reset();
+        reset();
         wind.set(0, 0);
         sbRadius = 25;
         sbDensity = 2;
@@ -784,7 +784,12 @@ public class Main extends ApplicationAdapter {
 
     private void checkWin(){
         if(player.getWin()&&coinSpawner.getCoins()>4){
-            generateLevel();
+            if(!sandbox){
+                generateLevel();
+            }else{
+                clearWorld();
+                reset();
+            }
         }
     }
 

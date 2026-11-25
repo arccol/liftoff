@@ -193,7 +193,7 @@ public class Player {
     }
 
     public void reset() {
-        position.set(600,400);
+        position.set(100,100);
         vel.set(0,0);
         accel.set(0,0);
         win = false;
