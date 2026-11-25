@@ -27,6 +27,7 @@ public class Player {
     Vector2 movementVector;
     List<Vector2> trail;
     boolean win;
+    boolean pause;
 
     public Player(int x, int y, int rad, Texture playerTexture){
         position = new Vector2();
@@ -44,6 +45,7 @@ public class Player {
         vel.set(0,0);
         distanceToPlanet = 9999;
         win = false;
+        pause = false;
         trail = new ArrayList<>();
     }
 
@@ -53,11 +55,24 @@ public class Player {
         return degs;
     }
 
-    public void updatePos(){
-        position.add(vel);
-        movementVector.set(position.cpy().sub(prevpos));
-        prevpos.set(position.cpy());
-        trail.add(prevpos.cpy());
+    public void updatePos() {
+        if (!pause) {
+            position.add(vel);
+            movementVector.set(position.cpy().sub(prevpos));
+            prevpos.set(position.cpy());
+            trail.add(prevpos.cpy());
+        }
+    }
+
+    public boolean oob(){
+        if(position.x>3000||position.x<-1000||position.y>2000||position.y<-1000){
+            return true;
+        }
+        return false;
+    }
+
+    public void pause(){
+        pause = true;
     }
 
     public void applyForce(Vector2 force, float delta) {
@@ -183,5 +198,6 @@ public class Player {
         accel.set(0,0);
         win = false;
         launched = false;
+        pause = false;
     }
 }

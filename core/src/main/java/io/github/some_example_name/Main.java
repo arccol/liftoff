@@ -549,20 +549,6 @@ public class Main extends ApplicationAdapter {
             selectedInvenPlanet = null;
         }
 
-        if(currentScreen == Screen.GAME && Gdx.input.isKeyJustPressed(Input.Keys.D)){
-            generateDebris();
-        }
-
-        if(currentScreen == Screen.GAME && Gdx.input.isKeyJustPressed(Input.Keys.F)){
-            int goalRad = 20;
-            int goalDens = 1;
-            if(sandbox){
-                goalRad = sbRadius;
-                goalDens = sbDensity;
-            }
-            planets.add(new RealPlanet((int) mousePos.x, (int) mousePos.y, goalRad, goalDens, coinList, planetTexture, true, goalFlagTexture));
-        }
-
         if(leftJustPressed && !inventoryDrag){
             staticMousePos.set(mousePos.cpy());
         }
@@ -666,14 +652,6 @@ public class Main extends ApplicationAdapter {
                     d.draw(batch);
                 }
 
-                if(Gdx.input.isKeyJustPressed(Input.Keys.W)){
-                    wind.set(rand.nextFloat(-windBound,windBound),rand.nextFloat(-windBound,windBound));
-                }
-
-                if(Gdx.input.isKeyJustPressed(Input.Keys.R)){
-                    reset();
-                }
-
                 for(WindParticle particle : windParticles){
                     particle.updatePos(wind);
                     particle.draw(sr, opacity);
@@ -734,8 +712,26 @@ public class Main extends ApplicationAdapter {
                 sr.circle(25,995,20);
                 sr.end();
                 batch.begin();
-                font.setColor(Color.RED);
-                font.draw(batch,""+(Math.max(5-coinSpawner.getCoins(),0)),20,1000);
+                if(coinSpawner.getCoins()>4) {
+                    font.setColor(Color.FOREST);
+                }else{
+                    font.setColor(Color.RED);
+                }
+                font.draw(batch,""+coinSpawner.getCoins(),20,1000);
+
+                if(player.oob()&&!sandbox){
+                    player.pause();
+                    font.setColor(Color.RED);
+                    font.getData().setScale(10f);
+                    font.draw(batch,"Out of bounds!",500,700);
+                    font.getData().setScale(6f);
+                    font.draw(batch, "Press R to restart",650,500);
+                    font.getData().setScale(1f);
+                    if(Gdx.input.isKeyJustPressed(Input.Keys.R)){
+                        generateLevel();
+                    }
+                }
+
                 batch.end();
                 player.drawTrail(sr);
                 player.draw(batch);
@@ -869,8 +865,13 @@ public class Main extends ApplicationAdapter {
         }
         wind.x = MathUtils.clamp(wind.x, -windMax, windMax);
         wind.y = MathUtils.clamp(wind.y, -windMax, windMax);
+
         if(Gdx.input.isKeyJustPressed(Input.Keys.Q)){
             wind.set(0, 0);
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.W)){
+            wind.set(rand.nextFloat(-windBound,windBound),rand.nextFloat(-windBound,windBound));
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.LEFT_BRACKET)) {
@@ -884,6 +885,20 @@ public class Main extends ApplicationAdapter {
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.EQUALS)){
             sbDensity = Math.min(9, sbDensity + 1);
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.R)){
+            reset();
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.D)){
+            generateDebris();
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
+            int goalRad = sbRadius;
+            int goalDens = sbDensity;
+            planets.add(new RealPlanet((int) mousePos.x, (int) mousePos.y, goalRad, goalDens, coinList, planetTexture, true, goalFlagTexture));
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !isOverPot(mousePos)){
